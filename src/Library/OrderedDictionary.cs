@@ -10,6 +10,9 @@ namespace RGiesecke.PlainCsv
   /// A dictionary that keeps the elements in their original order
   /// </summary>
   public class OrderedDictionary<TKey, TValue> : IDictionary<TKey, TValue>
+#if ReadOnlyDictionary
+  , IReadOnlyDictionary<TKey, TValue>
+#endif
   {
     private readonly ICollection<TKey> _Keys;
     private readonly IDictionary<TKey, TValue> _Dictionary;
@@ -116,6 +119,17 @@ namespace RGiesecke.PlainCsv
       set { _Dictionary[key] = value; }
     }
 
+#if ReadOnlyDictionary
+    IEnumerable<TKey> IReadOnlyDictionary<TKey, TValue>.Keys
+    {
+      get { return Keys; }
+    }
+
+    IEnumerable<TValue> IReadOnlyDictionary<TKey, TValue>.Values
+    {
+      get { return Values; }
+    }
+#endif
     public ICollection<TKey> Keys
     {
       get { return _Keys; }

@@ -3,7 +3,13 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
-
+#if ReadOnlyDictionary
+using ReturnedDictionary = System.Collections.Generic.IReadOnlyDictionary<string, string>;
+using ReadOnlyStrings = System.Collections.Generic.IReadOnlyList<string>;
+#else
+using ReturnedDictionary = System.Collections.Generic.IDictionary<string, string>;
+using ReadOnlyStrings = System.Collections.ObjectModel.ReadOnlyCollection<string>;
+#endif
 namespace RGiesecke.PlainCsv
 {
   public class PlainCsvReader : PlainCsvBase
@@ -15,7 +21,7 @@ namespace RGiesecke.PlainCsv
     {
     }
 
-    public IEnumerable<IDictionary<string, string>> CsvToDictionaries(IEnumerable<char> characters, IEqualityComparer<string> keyComparer = null)
+    public IEnumerable<ReturnedDictionary> CsvToDictionaries(IEnumerable<char> characters, IEqualityComparer<string> keyComparer = null)
     {
       var rows = ReadCsvRows(characters);
 
@@ -23,8 +29,8 @@ namespace RGiesecke.PlainCsv
       if (!rowsEnum.MoveNext())
         yield break;
 
-      ReadOnlyCollection<string> headerNames;
-      ReadOnlyCollection<string> currentValues;
+      ReadOnlyStrings headerNames;
+      ReadOnlyStrings currentValues;
       if (CsvOptions.UseHeaderRow)
       {
         headerNames = rowsEnum.Current;
@@ -52,7 +58,7 @@ namespace RGiesecke.PlainCsv
       } while (rowsEnum.MoveNext());
     }
 
-    public IEnumerable<ReadOnlyCollection<string>> ReadCsvRows(IEnumerable<Char> characters)
+    public IEnumerable<ReadOnlyStrings> ReadCsvRows(IEnumerable<Char> characters)
     {
       var currentValues = new List<string>();
 
