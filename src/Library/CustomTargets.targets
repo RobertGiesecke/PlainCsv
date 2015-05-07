@@ -1,6 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
+    <BuildNugetPackage>true</BuildNugetPackage>
     <PostBuildEventDependsOn>
       $(PostBuildEventDependsOn);
       BuildNugetPackage
@@ -27,6 +28,20 @@
     <RemoveDir Condition="exists('$(Net35LibDir)')" Directories="$(Net35LibDir)"/>
     
     <CallTarget Condition="'$(Framework35Dir)' != '' and exists('$(Framework35Dir)')" Targets="BuildForFx35"/>
+
+    <PropertyGroup>
+      <NugetTargetDir Condition="'$(NugetTargetDir)' == ''">$(TargetDir)/Deploy</NugetTargetDir>
+      <TargetDirWithoutTralingSlash>$(NugetTargetDir.TrimEnd('\').TrimEnd('/'))</TargetDirWithoutTralingSlash>
+    </PropertyGroup>
+
+    <MakeDir Condition="!exists('$(NugetTargetDir)')" Directories="$(NugetTargetDir)"/>
+
+    <PropertyGroup>
+      <NugetBuildCall>$(NuGetCommand) pack &quot;$(MSBuildProjectFullPath)&quot; -p Configuration=$(Configuration) -o &quot;$(NugetTargetDir)&quot;</NugetBuildCall>
+    </PropertyGroup>
+    <Exec Command="$(NugetBuildCall) -Symbols"
+          LogStandardErrorAsError="true"
+          Condition="'$(NuGetCommand)' != ''"/>
   </Target>
 
   <Target Name="CheckForReadOnlyDictionary" BeforeTargets="CoreBuild">

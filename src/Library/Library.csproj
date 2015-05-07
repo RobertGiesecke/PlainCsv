@@ -53,6 +53,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="CustomTargets.targets" />
+    <None Include="Library.nuspec" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="CustomTargets.targets" Condition="exists('CustomTargets.targets')" />

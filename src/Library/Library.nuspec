@@ -1,0 +1,26 @@
+﻿<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata>
+    <id>PlainCsv</id>
+    <title>Simple (but correct) library to read and write CSV files</title>
+    <authors>Robert Giesecke</authors>
+    <owners>Robert Giesecke</owners>
+    <version>1.0.0</version>
+    <summary></summary>
+    <description>This is a simple library to read and write CSV files.
+
+    Simple means it doesn't have fance mapping to DTOs or any thing like that.  
+    It's main purpose is to read CSV to dictionaries or write dictionaries to CSV.
+    But to do it correctly (i.e. not messing up when it encounters line breaks).
+    </description>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+
+    <releaseNotes></releaseNotes>
+    <tags>csv sparated</tags>
+  </metadata>
+  <files>
+    <file src="NuGetBuild\lib\net35\*.dll" target="lib/net35"></file>
+    <file src="NuGetBuild\lib\net35\*.pdb" target="lib/net35"></file>
+    <file src="**\*.cs" target="src" exclude="obj\**\*.*"></file>
+  </files>
+</package>
