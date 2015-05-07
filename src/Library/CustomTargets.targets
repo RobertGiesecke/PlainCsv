@@ -7,6 +7,7 @@
     </PostBuildEventDependsOn>
 
     <BuildDependsOn>
+      CheckForReadOnlyDictionary;
       $(BuildDependsOn);
       BuildNugetPackage
     </BuildDependsOn>
@@ -16,6 +17,13 @@
   <Target Name="BuildNugetPackage" Condition="'$(BuildPackage)' == 'true'">
     <!-- use NuGetCommand here -->
   </Target>
+
+  <Target Name="CheckForReadOnlyDictionary" BeforeTargets="CoreBuild">
+    <PropertyGroup Condition ="'$(TargetFrameworkVersion)' != 'v3.5' and '$(TargetFrameworkVersion)' != 'v4.0'">
+      <DefineConstants>$(DefineConstants) ReadOnlyDictionary</DefineConstants>
+    </PropertyGroup>
+  </Target>
+
 
   <Target Name="DllExportFindNugetVersion"
           Condition="'$(BuildPackage)' == 'true' and '$(NuGetCommand)' == '' and '$(NuGetToolsPath)' == ''"
