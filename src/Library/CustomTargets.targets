@@ -1,0 +1,50 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <PostBuildEventDependsOn>
+      $(PostBuildEventDependsOn);
+      BuildNugetPackage
+    </PostBuildEventDependsOn>
+
+    <BuildDependsOn>
+      $(BuildDependsOn);
+      BuildNugetPackage
+    </BuildDependsOn>
+    <BuildPackage>true</BuildPackage>
+  </PropertyGroup>
+
+  <Target Name="BuildNugetPackage" Condition="'$(BuildPackage)' == 'true'">
+    <!-- use NuGetCommand here -->
+  </Target>
+
+  <Target Name="DllExportFindNugetVersion"
+          Condition="'$(BuildPackage)' == 'true' and '$(NuGetCommand)' == '' and '$(NuGetToolsPath)' == ''"
+          BeforeTargets="BuildNugetPackage">
+    <XmlPeek XmlInputPath="$(SolutionDir).nuget/packages.config"
+             Query="/packages/package[@id='NuGet.CommandLine']/@version">
+      <Output TaskParameter="Result"
+              ItemName="NugetCommandLineVersionItem"/>
+    </XmlPeek>
+    <PropertyGroup>
+      <NugetCommandLineVersion Condition="'$(NugetCommandLineVersion)' == ''">@(NugetCommandLineVersionItem)</NugetCommandLineVersion>
+    </PropertyGroup>
+
+    <CreateProperty Condition="'$(NuGetToolsPath)' == ''"
+                    Value="$(SolutionDir)packages/NuGet.CommandLine.$(NugetCommandLineVersion)\tools">
+      <Output TaskParameter="Value"
+              PropertyName="NuGetToolsPath"></Output>
+    </CreateProperty>
+  </Target>
+
+  <Target Name="DllExportSetupNuGetCommand" Condition="'$(NuGetCommand)' == '' and '$(NuGetToolsPath)' != ''"
+  AfterTargets="DllExportFindNugetVersion"
+  BeforeTargets="BuildNugetPackage">
+    <PropertyGroup>
+      <NuGetExePath Condition=" '$(NuGetExePath)' == '' ">$(NuGetToolsPath)\NuGet.exe</NuGetExePath>
+
+      <NuGetCommand Condition=" '$(OS)' == 'Windows_NT'">"$(NuGetExePath)"</NuGetCommand>
+      <NuGetCommand Condition=" '$(OS)' != 'Windows_NT' ">mono --runtime=v4.0.30319 "$(NuGetExePath)"</NuGetCommand>
+    </PropertyGroup>
+  </Target>
+
+</Project>
