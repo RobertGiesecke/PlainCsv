@@ -11,11 +11,22 @@
       $(BuildDependsOn);
       BuildNugetPackage
     </BuildDependsOn>
-    <BuildPackage>true</BuildPackage>
+    <Net35LibDir>$(MSBuildProjectDirectory)/NuGetBuild/lib/net35</Net35LibDir>
   </PropertyGroup>
 
-  <Target Name="BuildNugetPackage" Condition="'$(BuildPackage)' == 'true'">
-    <!-- use NuGetCommand here -->
+  <Target Name="BuildForFx35">
+    <MakeDir Directories="$(Net35LibDir)"/>
+
+    <MSBuild Condition=""
+             Projects="$(MSBuildProjectFullPath)"
+             Targets="Rebuild"
+             Properties="Platform=$(Platform);BuildNugetPackage=false;Configuration=$(Configuration);TargetFrameworkVersion=v3.5;TargetFrameworkProfile=Client;OutputPath=$(Net35LibDir)" />
+  </Target>
+
+  <Target Name="BuildNugetPackage" Condition="'$(BuildNugetPackage)' == 'true' and '$(TargetFrameworkVersion)' != 'v3.5'">
+    <RemoveDir Condition="exists('$(Net35LibDir)')" Directories="$(Net35LibDir)"/>
+    
+    <CallTarget Condition="'$(Framework35Dir)' != '' and exists('$(Framework35Dir)')" Targets="BuildForFx35"/>
   </Target>
 
   <Target Name="CheckForReadOnlyDictionary" BeforeTargets="CoreBuild">
@@ -26,7 +37,7 @@
 
 
   <Target Name="DllExportFindNugetVersion"
-          Condition="'$(BuildPackage)' == 'true' and '$(NuGetCommand)' == '' and '$(NuGetToolsPath)' == ''"
+          Condition="'$(BuildNugetPackage)' == 'true' and '$(NuGetCommand)' == '' and '$(NuGetToolsPath)' == ''"
           BeforeTargets="BuildNugetPackage">
     <XmlPeek XmlInputPath="$(SolutionDir).nuget/packages.config"
              Query="/packages/package[@id='NuGet.CommandLine']/@version">
