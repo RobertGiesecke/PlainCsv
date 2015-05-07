@@ -35,11 +35,11 @@ namespace RGiesecke.PlainCsv
       }
     }
 
-    public CsvOptions(char quoteChar, char delimiter, CsvFlags csvFlags)
+    public CsvOptions(char quoteChar, char delimiter, CsvFlags? csvFlags = null)
     {
       QuoteChar = quoteChar;
       Delimiter = delimiter;
-      CsvFlags = csvFlags;
+      CsvFlags = csvFlags ?? Default.CsvFlags;
     }
 
     public CsvOptions()
