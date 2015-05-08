@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
@@ -12,38 +13,80 @@ namespace RGiesecke.PlainCsv.Tests
   [TestFixture(), ExcludeFromCodeCoverage]
   public class PlainCsvWriterTests
   {
+
+    [Test()]
+    public void DictionariesToCsv_Handles_HashTable()
+    {
+      Action<bool> runCaseSensitive = i =>
+      {
+        var target = new PlainCsvWriter();
+        var sb = target.DictionariesToCsvString(GetPlainTestData().Select(t => new Hashtable(t)), 
+                                                i ? StringComparer.OrdinalIgnoreCase : null);
+        using (var r = new StringReader(sb.ToString()))
+          AssertPlainTestData(r, i);
+      };
+
+      runCaseSensitive(true);
+      runCaseSensitive(false);
+    }
+
     [Test()]
     public void DictionariesToCsv_Merges_Columns_From_all_Entries()
     {
-      var target = new PlainCsvWriter();
-      using (var w = new StringWriter())
+      Action<bool> runCaseSensitive = i =>
       {
-        target.DictionariesToCsv(w, new[]
-        {
-          new Dictionary<string, decimal?>
-          {
-            {"a", 1},
-            {"b", 2.98m},
-          },
-          new Dictionary<string, decimal?>
-          {
-            {"a", -727},
-            {"c", 1000m},
-          },
-        });
-        var asString = w.ToString();
+        var target = new PlainCsvWriter();
+        var sb = target.DictionariesToCsvString(GetPlainTestData(), i ? StringComparer.OrdinalIgnoreCase : null);
+        using (var r = new StringReader(sb.ToString()))
+          AssertPlainTestData(r, i);
+      };
 
-        using (var r = new StringReader(asString))
+      runCaseSensitive(true);
+      runCaseSensitive(false);
+    }
+
+    protected void AssertPlainTestData(TextReader reader, bool ignoreHeaderCase)
+    {
+      var headerRow = reader.ReadLine();
+      var firstLine = reader.ReadLine();
+      var secondLine = reader.ReadLine();
+      var thirdLine = reader.ReadLine();
+      if (ignoreHeaderCase)
+        Assert.That(headerRow, Is.EqualTo("a,b,c"));
+      else
+        Assert.That(headerRow, Is.EqualTo("a,b,c,B"));
+      var suffix = ignoreHeaderCase ? "" : ",";
+      Assert.That(firstLine, Is.EqualTo("1,2.98," + suffix));
+      Assert.That(secondLine, Is.EqualTo("-727,,1000" + suffix));
+
+      if (ignoreHeaderCase)
+        Assert.That(thirdLine, Is.EqualTo(",1922-03-07,3.2"));
+      else
+        Assert.That(thirdLine, Is.EqualTo(suffix + ",3.2,1922-03-07"));
+
+      Assert.That(reader.Peek(), Is.LessThan(0));
+    }
+
+    protected Dictionary<string, object>[] GetPlainTestData()
+    {
+      return new[]
+      {
+        new Dictionary<string, object>
         {
-          var headerRow = r.ReadLine();
-          var firstLine = r.ReadLine();
-          var secondLine = r.ReadLine();
-          Assert.That(headerRow, Is.EqualTo("a,b,c"));
-          Assert.That(firstLine, Is.EqualTo("1,2.98,"));
-          Assert.That(secondLine, Is.EqualTo("-727,,1000"));
-          Assert.That(r.Peek(), Is.LessThan(0));
-        }
-      }
+          {"a", 1},
+          {"b", 2.98m},
+        },
+        new Dictionary<string, object>
+        {
+          {"a", -727},
+          {"c", 1000m},
+        },
+        new Dictionary<string, object>
+        {
+          {"B", new DateTime(1922, 3, 7)},
+          {"c", 3.2f},
+        },
+      };
     }
   }
 }
