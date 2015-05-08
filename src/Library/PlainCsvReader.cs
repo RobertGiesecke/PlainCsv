@@ -44,6 +44,7 @@ namespace RGiesecke.PlainCsv
       var rowIndex = 0;
       do
       {
+        currentValues = rowsEnum.Current;
         var d = new OrderedDictionary<string, string>(keyComparer);
         if (currentValues.Count != headerNames.Count)
           throw new InvalidOperationException(string.Format("Row {0}: The row value count ({1}) does not equal the head count ({2}).\n{3}\n{4}", rowIndex, currentValues.Count, headerNames.Count, string.Join(",", headerNames.ToArray()), string.Join(",", currentValues.ToArray())));
@@ -54,7 +55,6 @@ namespace RGiesecke.PlainCsv
         }
         yield return d;
         rowIndex += 1;
-        currentValues = rowsEnum.Current;
       } while (rowsEnum.MoveNext());
     }
 
