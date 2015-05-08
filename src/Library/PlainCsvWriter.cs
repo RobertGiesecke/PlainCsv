@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Text;
 
 namespace RGiesecke.PlainCsv
 {
@@ -12,6 +13,30 @@ namespace RGiesecke.PlainCsv
     public PlainCsvWriter(CsvOptions csvOptions = null)
       : base(csvOptions)
     {
+    }
+
+    public StringBuilder DictionariesToCsvString<TKey, TValue>(IEnumerable<IEnumerable<KeyValuePair<TKey, TValue>>> list,
+      IEqualityComparer<TKey> keyComparer = null, CultureInfo cultureInfo = null)
+    {
+      var sb = new StringBuilder();
+      using (var w = new StringWriter(sb))
+      {
+        DictionariesToCsv(w, list, keyComparer, cultureInfo);
+      }
+      return sb;
+    }
+
+    public StringBuilder DictionariesToCsvString(
+      IEnumerable<Hashtable> list,
+      IEqualityComparer keyComparer = null,
+      CultureInfo cultureInfo = null)
+    {
+      var sb = new StringBuilder();
+      using (var w = new StringWriter(sb))
+      {
+        DictionariesToCsv(w, list, keyComparer, cultureInfo);
+      }
+      return sb;
     }
 
     protected sealed class WrappedEqualityComparer : IEqualityComparer<object>
