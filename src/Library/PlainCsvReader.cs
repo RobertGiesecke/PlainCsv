@@ -35,10 +35,9 @@ namespace RGiesecke.PlainCsv
         headerNames = rowsEnum.Current;
         if (!rowsEnum.MoveNext())
           yield break;
-        currentValues = rowsEnum.Current;
       }
       else
-        headerNames = (currentValues = rowsEnum.Current).Select((n, i) => "Field" + (i + 1)).ToList().AsReadOnly();
+        headerNames = rowsEnum.Current.Select((n, i) => "Field" + (i + 1)).ToList().AsReadOnly();
 
       var rowIndex = 0;
       do
