@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -11,6 +12,35 @@ namespace RGiesecke.PlainCsv
     public PlainCsvWriter(CsvOptions csvOptions = null)
       : base(csvOptions)
     {
+    }
+
+    protected sealed class WrappedEqualityComparer : IEqualityComparer<object>
+    {
+      private readonly IEqualityComparer _Comparer;
+      public bool Equals(object x, object y)
+      {
+        return _Comparer.Equals(x, y);
+      }
+
+      public int GetHashCode(object obj)
+      {
+        return _Comparer.GetHashCode(obj);
+      }
+
+      public WrappedEqualityComparer(IEqualityComparer comparer)
+      {
+        _Comparer = comparer;
+      }
+    }
+
+    public void DictionariesToCsv(TextWriter writer, IEnumerable<Hashtable> list,
+      IEqualityComparer keyComparer = null, CultureInfo cultureInfo = null)
+    {
+      IEqualityComparer<object> comparer = keyComparer != null ? new WrappedEqualityComparer(keyComparer) : null;
+      DictionariesToCsv(writer,
+          list.Select(t => t.Cast<DictionaryEntry>()
+                            .Select(e => new KeyValuePair<object, object>(e.Key, e.Value))),
+          comparer, cultureInfo);
     }
 
     public void DictionariesToCsv<TKey, TValue>(TextWriter writer, IEnumerable<IEnumerable<KeyValuePair<TKey, TValue>>> list, IEqualityComparer<TKey> keyComparer = null, CultureInfo cultureInfo = null)
