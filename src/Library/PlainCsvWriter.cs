@@ -70,7 +70,7 @@ namespace RGiesecke.PlainCsv
 
     public void DictionariesToCsv<TKey, TValue>(TextWriter writer, IEnumerable<IEnumerable<KeyValuePair<TKey, TValue>>> list, IEqualityComparer<TKey> keyComparer = null, CultureInfo cultureInfo = null)
     {
-      var asList = list.Select(WrapDictionary).ToList().AsReadOnly();
+      var asList = list.Select(t => WrapDictionary(t, keyComparer)).ToList().AsReadOnly();
       if (asList.Count == 0)
         return;
 
@@ -124,14 +124,21 @@ namespace RGiesecke.PlainCsv
       }
     }
 
-    protected virtual DictionaryWrapper<TKey, TValue> WrapDictionary<TKey, TValue>(IEnumerable<KeyValuePair<TKey, TValue>> keyValuePairs)
+    protected virtual DictionaryWrapper<TKey, TValue> WrapDictionary<TKey, TValue>(IEnumerable<KeyValuePair<TKey, TValue>> keyValuePairs, IEqualityComparer<TKey> keyComparer)
     {
+      if (keyComparer != null)
+      {
+        var d = keyValuePairs as Dictionary<TKey, TValue>;
+        if (d != null && !Equals(d.Comparer, keyComparer))
+          keyValuePairs = keyValuePairs.ToDictionary(k => k.Key, v => v.Value, keyComparer);
+      }
+
 #if ReadOnlyDictionary
       var rd = keyValuePairs as IReadOnlyDictionary<TKey, TValue>;
       if (rd != null)
         return new DictionaryWrapper<TKey, TValue>(rd.Keys, rd.Count, rd.TryGetValue);
 #endif
-      var dx = (IDictionary<TKey, TValue>)keyValuePairs;
+      var dx = keyValuePairs as IDictionary<TKey, TValue> ?? keyValuePairs.ToDictionary(k => k.Key, v => v.Value, keyComparer);
       return new DictionaryWrapper<TKey, TValue>(dx.Keys.AsEnumerable(), dx.Count, dx.TryGetValue);
     }
 
