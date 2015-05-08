@@ -42,6 +42,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="IncorrectCsvColumnCountException.cs" />
     <Compile Include="PlainCsvBase.cs" />
     <Compile Include="PlainCsvWriter.cs" />
     <Compile Include="CsvOptions.cs" />

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 #if ReadOnlyDictionary
@@ -47,7 +46,7 @@ namespace RGiesecke.PlainCsv
         currentValues = rowsEnum.Current;
         var d = new OrderedDictionary<string, string>(keyComparer);
         if (currentValues.Count != headerNames.Count)
-          throw new InvalidOperationException(string.Format("Row {0}: The row value count ({1}) does not equal the head count ({2}).\n{3}\n{4}", rowIndex, currentValues.Count, headerNames.Count, string.Join(",", headerNames.ToArray()), string.Join(",", currentValues.ToArray())));
+          throw new IncorrectCsvColumnCountException(rowIndex, currentValues, headerNames);
 
         for (int i = 0; i < headerNames.Count; i++)
         {
