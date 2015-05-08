@@ -28,5 +28,43 @@ namespace RGiesecke.PlainCsv
 
       return asString + text.Replace(asString, asString + asString) + asString;
     }
+
+    public static CultureInfo GetPersistedCultureInfo()
+    {
+      var cultureInfo = (CultureInfo)CultureInfo.InvariantCulture.Clone();
+      var df = cultureInfo.DateTimeFormat;
+      df.LongDatePattern = "s";
+      df.ShortDatePattern = "yyyy'-'MM'-'dd";
+      df.DateSeparator = "-";
+      df.TimeSeparator = ":";
+      df.ShortTimePattern = "HH':'mm':'ss";
+      df.FullDateTimePattern = "s";
+      return cultureInfo;
+    }
+
+    public static string ConvertToString(object value, CultureInfo cultureInfo)
+    {
+      if (value == null)
+        return null;
+
+      var asDt = value as DateTime?;
+      if (asDt != null)
+      {
+        DateTime dateTime = asDt.Value;
+        if (dateTime != DateTime.MinValue)
+        {
+          if (dateTime.Date == DateTime.MinValue)
+            return dateTime.ToString("T", cultureInfo);
+          if (dateTime.TimeOfDay == TimeSpan.Zero)
+            return dateTime.ToString("d", cultureInfo);
+        }
+      }
+
+      var asDecimal = value as decimal?;
+      if (asDecimal != null)
+        return asDecimal.Value.ToString("0.################################", cultureInfo);
+
+      return Convert.ToString(value, cultureInfo);
+    }
   }
 }

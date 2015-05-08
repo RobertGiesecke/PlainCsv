@@ -103,7 +103,7 @@ namespace RGiesecke.PlainCsv
           if (i > 0)
             writer.Write(csvOptions.Delimiter);
 
-          writer.Write(escapeText(Convert.ToString(headerValues[i], cultureInfo)));
+          writer.Write(escapeText(CsvUtils.ConvertToString(headerValues[i], cultureInfo)));
         }
 
         writer.WriteLine();
@@ -118,7 +118,7 @@ namespace RGiesecke.PlainCsv
 
           TValue value;
           if (row.TryGetValue(headerValues[i], out value))
-            writer.Write(escapeText(Convert.ToString(value, cultureInfo)));
+            writer.Write(escapeText(CsvUtils.ConvertToString(value, cultureInfo)));
         }
         writer.WriteLine();
       }
