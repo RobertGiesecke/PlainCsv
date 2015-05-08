@@ -66,6 +66,7 @@
     <Otherwise />
   </Choose>
   <ItemGroup>
+    <Compile Include="CsvUtilsTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PlainCsvReaderTests.cs" />
     <Compile Include="PlainCsvWriterTests.cs" />
