@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Globalization;
+using System.Linq;
 
 namespace RGiesecke.PlainCsv
 {
@@ -40,6 +42,25 @@ namespace RGiesecke.PlainCsv
       df.ShortTimePattern = "HH':'mm':'ss";
       df.FullDateTimePattern = "s";
       return cultureInfo;
+    }
+
+    internal static bool IsNullOrWhiteSpace(this string text)
+    {
+#if ReadOnlyDictionary
+      return string.IsNullOrWhiteSpace(text);
+#else
+      return string.IsNullOrEmpty(text) || text.All(Char.IsWhiteSpace);
+#endif
+    }
+
+    public static DateTime? ParseDateTime(string text, CultureInfo cultureInfo)
+    {
+      if (text.IsNullOrWhiteSpace())
+        return null;
+      DateTime dt;
+      if (!DateTime.TryParse(text, cultureInfo, DateTimeStyles.NoCurrentDateDefault, out dt))
+        return null;
+      return dt;
     }
 
     public static string ConvertToString(object value, CultureInfo cultureInfo)
