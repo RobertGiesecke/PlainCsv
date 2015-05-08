@@ -143,14 +143,44 @@ namespace RGiesecke.PlainCsv.Tests
         var characters = string.Format("a{0}b{0}{1}c{2}{1}{0}s{2}1{0}2{0} 3{0}{1} {1}{1}{0}ä {1}", d, q, l);
         var actual = target.CsvToDictionaries(characters).ToList().AsReadOnly();
         Assert.That(actual.Count, Is.EqualTo(2));
-        Assert.That(actual[0].Keys, Is.EqualTo(new[] { "Field1", "Field2", "Field3", "Field4" }));
-        Assert.That(actual[0].Values, Is.EqualTo(new[] { "a", "b", "c" + l, "s" }));
-        Assert.That(actual[1].Values, Is.EqualTo(new[] { "1", "2", " 3", string.Format(" {1}{0}ä ", d, q) }));
+        Assert.That(actual[0].Keys, Is.EqualTo(new[] {"Field1", "Field2", "Field3", "Field4"}));
+        Assert.That(actual[0].Values, Is.EqualTo(new[] {"a", "b", "c" + l, "s"}));
+        Assert.That(actual[1].Values, Is.EqualTo(new[] {"1", "2", " 3", string.Format(" {1}{0}ä ", d, q)}));
       };
 
       runWithDelimiter("\n", ',', '"');
       runWithDelimiter("\r", '|', '~');
       runWithDelimiter("\r\n", ',', '-');
+    }
+
+    [Test()]
+    public void CsvToDictionaries_Throws_IncorrectCsvColumnCountException_for_Differencing_ColumnCounts()
+    {
+      Action<string, char, char, CsvFlags, int> runWithDelimiter = (l, d, q, f, r) =>
+      {
+        var target = new PlainCsvReader(new CsvOptions(q, d, f));
+        var characters = string.Format("a{0}b{0}{1}c{2}{1}{0}s{2}1{0}2{0} 3{0}{1} {1}{1}{0}ä {1}{0}x", d, q, l);
+
+        try
+        {
+          target.CsvToDictionaries(characters).ToList().AsReadOnly();
+          Assert.Fail("Did not throw {0}.", typeof(IncorrectCsvColumnCountException));
+        }
+        catch (IncorrectCsvColumnCountException ex)
+        {
+          // did throw the exception
+          Assert.That(ex.RowIndex, Is.EqualTo(r));
+          IList<string> expectedHeaders = new[] { "a", "b", "c" + l, "s" };
+          if ((f & CsvFlags.UseHeaderRow) != CsvFlags.UseHeaderRow)
+            expectedHeaders = expectedHeaders.Select((s, i) => "Field" + (i + 1)).ToList();
+          Assert.That(ex.HeaderNames, Is.EqualTo(expectedHeaders));
+          Assert.That(ex.CurrentValues, Is.EqualTo(new[] { "1", "2", " 3", string.Format(" {1}{0}ä ", d, q), "x" }));
+        }
+      };
+
+      runWithDelimiter("\n", ',', '"', CsvFlags.UseHeaderRow, 0); // the header row will not be added to the rowindex 
+      runWithDelimiter("\r", '|', '~', CsvFlags.None, 1);
+      runWithDelimiter("\r\n", ',', '-', CsvFlags.None, 1);
     }
   }
 }
