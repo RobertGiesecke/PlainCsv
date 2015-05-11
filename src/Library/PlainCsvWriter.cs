@@ -83,7 +83,7 @@ namespace RGiesecke.PlainCsv
           return null;
 
         if (csvOptions.QuoteFormulars && n.Trim().StartsWith("="))
-          return "=" + CsvUtils.QuoteText(n, csvOptions.QuoteChar);
+          return CsvUtils.QuoteText("=" + CsvUtils.QuoteText(n, csvOptions.QuoteChar), csvOptions.QuoteChar);
 
         if (n.IndexOfAny(escapeChars) > -1)
           return CsvUtils.QuoteText(n, csvOptions.QuoteChar);
