@@ -16,7 +16,7 @@ namespace RGiesecke.PlainCsv.Tests
     [Test()]
     public void ConvertToStringTest()
     {
-      var invariantCulture = CsvUtils.GetPersistedCultureInfo();
+      var invariantCulture = CsvUtils.PersistedCultureInfo;
       var de = CultureInfo.GetCultureInfo("de");
 
       Assert.That(CsvUtils.ConvertToString(1.50m, invariantCulture), Is.EqualTo("1.5"));
@@ -31,7 +31,7 @@ namespace RGiesecke.PlainCsv.Tests
     [Test()]
     public void ParseDateTimeTest()
     {
-      var invariantCulture = CsvUtils.GetPersistedCultureInfo();
+      var invariantCulture = CsvUtils.PersistedCultureInfo;
       var de = CultureInfo.GetCultureInfo("de");
       var en = CultureInfo.GetCultureInfo("en");
 

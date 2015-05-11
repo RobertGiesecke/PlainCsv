@@ -16,7 +16,9 @@ namespace RGiesecke.PlainCsv
       return asString + text.Replace(asString, asString + asString) + asString;
     }
 
-    public static CultureInfo GetPersistedCultureInfo()
+    public static readonly CultureInfo PersistedCultureInfo = GetPersistedCultureInfo();
+
+    private static CultureInfo GetPersistedCultureInfo()
     {
       var cultureInfo = (CultureInfo)CultureInfo.InvariantCulture.Clone();
       var df = cultureInfo.DateTimeFormat;
@@ -38,12 +40,17 @@ namespace RGiesecke.PlainCsv
 #endif
     }
 
-    public static DateTime? ParseDateTime(string text, CultureInfo cultureInfo)
+    public static DateTime? ParseDateTime(string text, CultureInfo cultureInfo = null)
     {
       if (text.IsNullOrWhiteSpace())
         return null;
 
-      return DateTime.Parse(text, cultureInfo, DateTimeStyles.NoCurrentDateDefault);
+      return DateTime.Parse(text, cultureInfo ?? PersistedCultureInfo, DateTimeStyles.NoCurrentDateDefault);
+    }
+
+    public static bool TryParseDateTime(string text, out DateTime? value)
+    {
+      return TryParseDateTime(text, PersistedCultureInfo, out value);
     }
 
     public static bool TryParseDateTime(string text, CultureInfo cultureInfo, out DateTime? value)
