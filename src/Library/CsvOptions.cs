@@ -37,6 +37,13 @@ namespace RGiesecke.PlainCsv
 
     public CsvOptions(char quoteChar, char delimiter, CsvFlags? csvFlags = null)
     {
+      if (quoteChar == delimiter)
+      {
+        throw new ArgumentOutOfRangeException("delimiter", 
+                                              string.Format("delimiter ({0}) and quoteChar ({1}) cannot be the same.",  
+                                                            delimiter, 
+                                                            quoteChar));
+      }
       QuoteChar = quoteChar;
       Delimiter = delimiter;
       CsvFlags = csvFlags ?? Default.CsvFlags;
