@@ -59,17 +59,17 @@ namespace RGiesecke.PlainCsv.Tests
       var secondLine = reader.ReadLine();
       var thirdLine = reader.ReadLine();
       if (ignoreHeaderCase)
-        Assert.That(headerRow, Is.EqualTo("a,b,c"));
+        Assert.That(headerRow, Is.EqualTo("a,\"b\"\"X\",D,c"));
       else
-        Assert.That(headerRow, Is.EqualTo("a,b,c,B"));
+        Assert.That(headerRow, Is.EqualTo("a,\"b\"\"X\",D,c,\"B\"\"x\""));
       var suffix = ignoreHeaderCase ? "" : ",";
-      Assert.That(firstLine, Is.EqualTo("1,2.98," + suffix));
-      Assert.That(secondLine, Is.EqualTo("-727,,1000" + suffix));
+      Assert.That(firstLine, Is.EqualTo("=1,2.98,," + suffix));
+      Assert.That(secondLine, Is.EqualTo("-727,,,1000" + suffix));
 
       if (ignoreHeaderCase)
-        Assert.That(thirdLine, Is.EqualTo(",1922-03-07,3.2"));
+        Assert.That(thirdLine, Is.EqualTo(",1922-03-07,,3.2"));
       else
-        Assert.That(thirdLine, Is.EqualTo(suffix + ",3.2,1922-03-07"));
+        Assert.That(thirdLine, Is.EqualTo(",," + suffix + "3.2,1922-03-07"));
 
       Assert.That(reader.Peek(), Is.LessThan(0));
     }
@@ -80,8 +80,9 @@ namespace RGiesecke.PlainCsv.Tests
       {
         new OrderedDictionary<string, object>
         {
-          {"a", 1},
-          {"b", 2.98m},
+          {"a", "=1"},
+          {"b\"X", 2.98m},
+          {"D", ""},
         },
         new OrderedDictionary<string, object>
         {
@@ -90,7 +91,7 @@ namespace RGiesecke.PlainCsv.Tests
         },
         new OrderedDictionary<string, object>
         {
-          {"B", new DateTime(1922, 3, 7)},
+          {"B\"x", new DateTime(1922, 3, 7)},
           {"c", 3.2f},
         },
       };
