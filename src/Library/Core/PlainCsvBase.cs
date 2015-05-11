@@ -1,6 +1,6 @@
 ﻿using System.Globalization;
 
-namespace RGiesecke.PlainCsv
+namespace RGiesecke.PlainCsv.Core
 {
   public abstract class PlainCsvBase
   {

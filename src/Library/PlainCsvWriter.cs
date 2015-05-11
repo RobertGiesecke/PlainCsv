@@ -5,6 +5,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+using RGiesecke.PlainCsv.Core;
 
 namespace RGiesecke.PlainCsv
 {
@@ -18,7 +19,7 @@ namespace RGiesecke.PlainCsv
     }
 
     public PlainCsvWriter(CsvOptions csvOptions = null)
-      : this(PlainCsv.DictionaryEntryConverter.Default, csvOptions)
+      : this(Core.DictionaryEntryConverter.Default, csvOptions)
     {
     }
 

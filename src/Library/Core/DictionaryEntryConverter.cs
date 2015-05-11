@@ -5,7 +5,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace RGiesecke.PlainCsv
+namespace RGiesecke.PlainCsv.Core
 {
   public class DictionaryEntryConverter : IDictionaryEntryConverter
   {

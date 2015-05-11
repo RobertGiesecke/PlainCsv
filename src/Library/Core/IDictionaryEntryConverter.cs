@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace RGiesecke.PlainCsv
+namespace RGiesecke.PlainCsv.Core
 {
   public interface IDictionaryEntryConverter
   {

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using RGiesecke.PlainCsv.Core;
 #if ReadOnlyDictionary
 using ReturnedDictionary = System.Collections.Generic.IReadOnlyDictionary<string, string>;
 using ReadOnlyStrings = System.Collections.Generic.IReadOnlyList<string>;

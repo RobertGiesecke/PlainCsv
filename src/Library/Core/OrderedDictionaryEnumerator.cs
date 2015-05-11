@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 
-namespace RGiesecke.PlainCsv
+namespace RGiesecke.PlainCsv.Core
 {
   public class OrderedDictionaryEnumerator<TKey, TValue> : IEnumerator<DictionaryEntry>, IEnumerator<KeyValuePair<TKey, TValue>>, IDictionaryEnumerator
   {

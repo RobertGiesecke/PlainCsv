@@ -42,19 +42,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DictionaryEntryConverter.cs" />
-    <Compile Include="IDictionaryEntryConverter.cs" />
+    <Compile Include="Core\DictionaryEntryConverter.cs" />
+    <Compile Include="Core\IDictionaryEntryConverter.cs" />
     <Compile Include="IncorrectCsvColumnCountException.cs" />
-    <Compile Include="OrderedDictionaryEnumerator.cs" />
-    <Compile Include="PlainCsvBase.cs" />
+    <Compile Include="Core\OrderedDictionaryEnumerator.cs" />
+    <Compile Include="Core\PlainCsvBase.cs" />
     <Compile Include="PlainCsvWriter.cs" />
     <Compile Include="CsvOptions.cs" />
     <Compile Include="PlainCsvReader.cs" />
     <Compile Include="CsvUtils.cs" />
-    <Compile Include="DictionaryWrapper.cs" />
-    <Compile Include="OrderedDictionary.cs" />
+    <Compile Include="Core\DictionaryWrapper.cs" />
+    <Compile Include="Core\OrderedDictionary.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="WrappedEqualityComparer.cs" />
+    <Compile Include="Core\WrappedEqualityComparer.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="CustomTargets.targets" />
