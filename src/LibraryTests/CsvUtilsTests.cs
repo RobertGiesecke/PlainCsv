@@ -5,6 +5,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NUnit.Framework.Constraints;
 using RGiesecke.PlainCsv;
 using NUnit.Framework;
 namespace RGiesecke.PlainCsv.Tests
@@ -34,17 +35,47 @@ namespace RGiesecke.PlainCsv.Tests
       var de = CultureInfo.GetCultureInfo("de");
       var en = CultureInfo.GetCultureInfo("en");
 
-      Assert.That(CsvUtils.ParseDateTime("1952-09-23", invariantCulture), Is.EqualTo(new DateTime(1952, 9, 23)));
-      Assert.That(CsvUtils.ParseDateTime("1952-09-23 10:02", invariantCulture), Is.EqualTo(new DateTime(1952, 9, 23, 10, 2, 0)));
+      Action<string, CultureInfo, DateTime?> compare = (text, ci, expected) =>
+      {
+        var expectation = expected != null ? (IResolveConstraint)Is.EqualTo(expected) : Is.Null;
+        Assert.That(CsvUtils.ParseDateTime(text, ci), expectation);
+        var pass = expected != null;
+        DateTime? result;
+        Assert.That(CsvUtils.TryParseDateTime(text, ci, out result), Is.EqualTo(pass));
+        Assert.That(result, expectation);
+      };
 
-      Assert.That(CsvUtils.ParseDateTime("23.09.1952 14:02:12", de), Is.EqualTo(new DateTime(1952, 9, 23, 14, 2, 12)));
-      Assert.That(CsvUtils.ParseDateTime("14:02:12", de), Is.EqualTo(new DateTime(1, 1, 1, 14, 2, 12)));
-      Assert.That(CsvUtils.ParseDateTime("02:02:12 pm", en), Is.EqualTo(new DateTime(1, 1, 1, 14, 2, 12)));
+      compare("1952-09-23", invariantCulture, new DateTime(1952, 9, 23));
+      compare("1952-09-23 10:02", invariantCulture, new DateTime(1952, 9, 23, 10, 2, 0));
 
-      Assert.That(CsvUtils.ParseDateTime("", en), Is.Null);
-      Assert.That(CsvUtils.ParseDateTime(" ", en), Is.Null);
-      Assert.That(CsvUtils.ParseDateTime(null, en), Is.Null);
-      Assert.That(CsvUtils.ParseDateTime("sometext!", en), Is.Null);
+      compare("23.09.1952 14:02:12", de, new DateTime(1952, 9, 23, 14, 2, 12));
+      compare("23.Okt.1952 14:02:12", de, new DateTime(1952, 10, 23, 14, 2, 12));
+      compare("14:02:12", de, new DateTime(1, 1, 1, 14, 2, 12));
+      compare("02:02:12 pm", en, new DateTime(1, 1, 1, 14, 2, 12));
+
+      compare("", en, null);
+      compare(" ", en, null);
+      compare(null, en, null);
+
+      Action<string, CultureInfo> triggerFormatException = (text, ci) =>
+      {
+
+        try
+        {
+          var r = CsvUtils.ParseDateTime(text, ci);
+          Assert.Fail("Invalid texts should trigger a FormatException");
+        }
+        catch (FormatException)
+        {
+        }
+      };
+
+      triggerFormatException("sometext!", en);
+      triggerFormatException("21.02.2010", en);
+      triggerFormatException("11-22-2010", de);
+      triggerFormatException("März-01-2010", en);
+      triggerFormatException("01-Okt-2010", en);
+
     }
 
     [Test()]

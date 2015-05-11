@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 
 namespace RGiesecke.PlainCsv
@@ -41,10 +42,26 @@ namespace RGiesecke.PlainCsv
     {
       if (text.IsNullOrWhiteSpace())
         return null;
+
+      return DateTime.Parse(text, cultureInfo, DateTimeStyles.NoCurrentDateDefault);
+    }
+
+    public static bool TryParseDateTime(string text, CultureInfo cultureInfo, out DateTime? value)
+    {
+      if (text.IsNullOrWhiteSpace())
+      {
+        value = null;
+        return false;
+      }
+
       DateTime dt;
-      if (!DateTime.TryParse(text, cultureInfo, DateTimeStyles.NoCurrentDateDefault, out dt))
-        return null;
-      return dt;
+      var result = DateTime.TryParse(text, cultureInfo, DateTimeStyles.NoCurrentDateDefault, out dt);
+      if (result)
+        value = dt;
+      else
+        value = null;
+
+      return result;
     }
 
     public static string ConvertToString(object value, CultureInfo cultureInfo)
