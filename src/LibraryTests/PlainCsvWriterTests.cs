@@ -14,13 +14,19 @@ namespace RGiesecke.PlainCsv.Tests
   public class PlainCsvWriterTests
   {
 
+    OrderedDictionary FromTyped<TKey, TValue>(OrderedDictionary<TKey, TValue> orderedDictionary)
+    {
+      return new OrderedDictionary(orderedDictionary.Select(t => new DictionaryEntry(t.Key, t.Value)), WrappedGenericEqualityComparer.FromTyped(orderedDictionary.KeyComparer));
+    }
+
     [Test()]
     public void DictionariesToCsv_Handles_HashTable()
     {
       Action<bool> runCaseSensitive = i =>
       {
         var target = new PlainCsvWriter();
-        var sb = target.DictionariesToCsvString(GetPlainTestData().Select(t => new Hashtable(t)), 
+        var PlainTestData = GetPlainTestData().Select(FromTyped);
+        var sb = target.DictionariesToCsvString(PlainTestData,
                                                 i ? StringComparer.OrdinalIgnoreCase : null);
         using (var r = new StringReader(sb.ToString()))
           AssertPlainTestData(r, i);
@@ -36,7 +42,8 @@ namespace RGiesecke.PlainCsv.Tests
       Action<bool> runCaseSensitive = i =>
       {
         var target = new PlainCsvWriter();
-        var sb = target.DictionariesToCsvString(GetPlainTestData(), i ? StringComparer.OrdinalIgnoreCase : null);
+        var PlainTestData = GetPlainTestData().Select(FromTyped);
+        var sb = target.DictionariesToCsvString(PlainTestData, i ? StringComparer.OrdinalIgnoreCase : null);
         using (var r = new StringReader(sb.ToString()))
           AssertPlainTestData(r, i);
       };
@@ -67,21 +74,21 @@ namespace RGiesecke.PlainCsv.Tests
       Assert.That(reader.Peek(), Is.LessThan(0));
     }
 
-    protected Dictionary<string, object>[] GetPlainTestData()
+    protected OrderedDictionary<string, object>[] GetPlainTestData()
     {
       return new[]
       {
-        new Dictionary<string, object>
+        new OrderedDictionary<string, object>
         {
           {"a", 1},
           {"b", 2.98m},
         },
-        new Dictionary<string, object>
+        new OrderedDictionary<string, object>
         {
           {"a", -727},
           {"c", 1000m},
         },
-        new Dictionary<string, object>
+        new OrderedDictionary<string, object>
         {
           {"B", new DateTime(1922, 3, 7)},
           {"c", 3.2f},

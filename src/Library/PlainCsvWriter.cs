@@ -10,9 +10,23 @@ namespace RGiesecke.PlainCsv
 {
   public class PlainCsvWriter : PlainCsvBase
   {
+    private readonly IDictionaryEntryConverter _DictionaryEntryConverter;
+
+    protected IDictionaryEntryConverter DictionaryEntryConverter
+    {
+      get { return _DictionaryEntryConverter; }
+    }
+
     public PlainCsvWriter(CsvOptions csvOptions = null)
+      : this(PlainCsv.DictionaryEntryConverter.Default, csvOptions)
+    {
+    }
+
+    public PlainCsvWriter(IDictionaryEntryConverter dictionaryEntryConverter, CsvOptions csvOptions = null)
       : base(csvOptions)
     {
+      if (dictionaryEntryConverter == null) throw new ArgumentNullException("dictionaryEntryConverter");
+      _DictionaryEntryConverter = dictionaryEntryConverter;
     }
 
     public StringBuilder DictionariesToCsvString<TKey, TValue>(IEnumerable<IEnumerable<KeyValuePair<TKey, TValue>>> list,
@@ -27,7 +41,7 @@ namespace RGiesecke.PlainCsv
     }
 
     public StringBuilder DictionariesToCsvString(
-      IEnumerable<Hashtable> list,
+      IEnumerable<IDictionary> list,
       IEqualityComparer keyComparer = null,
       CultureInfo cultureInfo = null)
     {
@@ -39,19 +53,19 @@ namespace RGiesecke.PlainCsv
       return sb;
     }
 
-    public void DictionariesToCsv(TextWriter writer, IEnumerable<Hashtable> list,
+    public void DictionariesToCsv(TextWriter writer, IEnumerable<IDictionary> list,
       IEqualityComparer keyComparer = null, CultureInfo cultureInfo = null)
     {
       var comparer = WrappedEqualityComparer.FromUntyped(keyComparer);
+
       DictionariesToCsv(writer,
-          list.Select(t => t.Cast<DictionaryEntry>()
-                            .Select(e => new KeyValuePair<object, object>(e.Key, e.Value))),
+          list.Select(t => t.Cast<object>().Select(DictionaryEntryConverter.FromUntyped(t))),
           comparer, cultureInfo);
     }
 
     public void DictionariesToCsv<TKey, TValue>(TextWriter writer, IEnumerable<IEnumerable<KeyValuePair<TKey, TValue>>> list, IEqualityComparer<TKey> keyComparer = null, CultureInfo cultureInfo = null)
     {
-      var asList = list.Select(t => WrapDictionary(t, keyComparer)).ToList().AsReadOnly();
+      var asList = list.Select(t => DictionaryEntryConverter.WrapDictionary(t, keyComparer)).ToList().AsReadOnly();
       if (asList.Count == 0)
         return;
 
@@ -103,24 +117,6 @@ namespace RGiesecke.PlainCsv
         }
         writer.WriteLine();
       }
-    }
-
-    protected virtual DictionaryWrapper<TKey, TValue> WrapDictionary<TKey, TValue>(IEnumerable<KeyValuePair<TKey, TValue>> keyValuePairs, IEqualityComparer<TKey> keyComparer)
-    {
-      if (keyComparer != null)
-      {
-        var d = keyValuePairs as Dictionary<TKey, TValue>;
-        if (d != null && !Equals(d.Comparer, keyComparer))
-          keyValuePairs = keyValuePairs.ToDictionary(k => k.Key, v => v.Value, keyComparer);
-      }
-
-#if ReadOnlyDictionary
-      var rd = keyValuePairs as IReadOnlyDictionary<TKey, TValue>;
-      if (rd != null)
-        return new DictionaryWrapper<TKey, TValue>(rd.Keys, rd.Count, rd.TryGetValue);
-#endif
-      var dx = keyValuePairs as IDictionary<TKey, TValue> ?? keyValuePairs.ToDictionary(k => k.Key, v => v.Value, keyComparer);
-      return new DictionaryWrapper<TKey, TValue>(dx.Keys.AsEnumerable(), dx.Count, dx.TryGetValue);
     }
 
     protected virtual char[] GetEscapeChars(CsvOptions csvOptions)

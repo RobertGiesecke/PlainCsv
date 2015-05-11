@@ -42,6 +42,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DictionaryEntryConverter.cs" />
+    <Compile Include="IDictionaryEntryConverter.cs" />
     <Compile Include="IncorrectCsvColumnCountException.cs" />
     <Compile Include="OrderedDictionaryEnumerator.cs" />
     <Compile Include="PlainCsvBase.cs" />
