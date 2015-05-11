@@ -52,6 +52,23 @@ namespace RGiesecke.PlainCsv.Tests
       runCaseSensitive(false);
     }
 
+
+    [Test()]
+    public void DictionariesToCsv_QuoteFormulars_Handles_Starting_EqualsSign()
+    {
+      var target = new PlainCsvWriter(new CsvOptions(CsvOptions.Default, csvFlags: CsvFlags.QuoteFormulars | CsvFlags.UseHeaderRow));
+      string line;
+      IEnumerable<IDictionary<string, object>> PlainTestData = GetPlainTestData();
+      var sb = target.DictionariesToCsvString(PlainTestData, StringComparer.OrdinalIgnoreCase);
+      using (var r = new StringReader(sb.ToString()))
+      {
+        r.ReadLine();
+        line = r.ReadLine();
+      }
+      Assert.That(line, Is.EqualTo("\"=\"\"=1\"\"\",2.98,,"));
+
+    }
+
     protected void AssertPlainTestData(TextReader reader, bool ignoreHeaderCase)
     {
       var headerRow = reader.ReadLine();
