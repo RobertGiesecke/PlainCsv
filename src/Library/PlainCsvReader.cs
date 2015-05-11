@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using RGiesecke.PlainCsv.Core;
+using System.Collections.ObjectModel;
 #if ReadOnlyDictionary
 using ReturnedDictionary = System.Collections.Generic.IReadOnlyDictionary<string, string>;
 using ReadOnlyStrings = System.Collections.Generic.IReadOnlyList<string>;
@@ -14,7 +15,7 @@ namespace RGiesecke.PlainCsv
 {
   public class PlainCsvReader : PlainCsvBase
   {
-    static readonly char[] _LineBreakChars = { '\r', '\n' };
+    protected static readonly ICollection<char> LineBreakChars = new ReadOnlyCollection<char>(new[] { '\r', '\n' });
 
     public PlainCsvReader(CsvOptions csvOptions = null)
       : base(csvOptions)
@@ -30,7 +31,6 @@ namespace RGiesecke.PlainCsv
         yield break;
 
       ReadOnlyStrings headerNames;
-      ReadOnlyStrings currentValues;
       if (CsvOptions.UseHeaderRow)
       {
         headerNames = rowsEnum.Current;
@@ -43,7 +43,7 @@ namespace RGiesecke.PlainCsv
       var rowIndex = 0;
       do
       {
-        currentValues = rowsEnum.Current;
+        var currentValues = rowsEnum.Current;
         var d = new OrderedDictionary<string, string>(keyComparer);
         if (currentValues.Count != headerNames.Count)
           throw new IncorrectCsvColumnCountException(rowIndex, currentValues, headerNames);
@@ -133,7 +133,7 @@ namespace RGiesecke.PlainCsv
           {
             currentValues.Add(getAndResetCurrentValue());
           }
-          else if (!withinString && _LineBreakChars.Contains(currentChar))
+          else if (!withinString && LineBreakChars.Contains(currentChar))
           {
             if (currentChar == '\r' && peek() == '\n')
               moveNext();
@@ -152,7 +152,7 @@ namespace RGiesecke.PlainCsv
         }
       }
 
-      if (maxValuesCount == 0 || (previousChar == null || _LineBreakChars.Contains(previousChar.Value)))
+      if (maxValuesCount == 0 || (previousChar == null || LineBreakChars.Contains(previousChar.Value)))
         yield break;
       currentValues.Add(currentValue.ToString());
       yield return currentValues.AsReadOnly();

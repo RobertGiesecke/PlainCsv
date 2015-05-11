@@ -11,12 +11,7 @@ namespace RGiesecke.PlainCsv
 {
   public class PlainCsvWriter : PlainCsvBase
   {
-    private readonly IDictionaryEntryConverter _DictionaryEntryConverter;
-
-    protected IDictionaryEntryConverter DictionaryEntryConverter
-    {
-      get { return _DictionaryEntryConverter; }
-    }
+    protected IDictionaryEntryConverter DictionaryEntryConverter { get; private set; }
 
     public PlainCsvWriter(CsvOptions csvOptions = null)
       : this(Core.DictionaryEntryConverter.Default, csvOptions)
@@ -27,7 +22,7 @@ namespace RGiesecke.PlainCsv
       : base(csvOptions)
     {
       if (dictionaryEntryConverter == null) throw new ArgumentNullException("dictionaryEntryConverter");
-      _DictionaryEntryConverter = dictionaryEntryConverter;
+      DictionaryEntryConverter = dictionaryEntryConverter;
     }
 
     public StringBuilder DictionariesToCsvString<TKey, TValue>(IEnumerable<IEnumerable<KeyValuePair<TKey, TValue>>> list,
