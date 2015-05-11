@@ -70,6 +70,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PlainCsvReaderTests.cs" />
     <Compile Include="PlainCsvWriterTests.cs" />
+    <Compile Include="StreamToCharConverterTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Library\Library.csproj">

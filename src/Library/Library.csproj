@@ -63,6 +63,7 @@
     <Compile Include="CsvWriterOptions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Core\WrappedEqualityComparer.cs" />
+    <Compile Include="StreamToCharConverter.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="CustomTargets.targets" />

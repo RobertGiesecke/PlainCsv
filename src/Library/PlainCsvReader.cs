@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using RGiesecke.PlainCsv.Core;
@@ -20,6 +21,16 @@ namespace RGiesecke.PlainCsv
     public PlainCsvReader(CsvOptions csvOptions = null)
       : base(csvOptions)
     {
+    }
+
+    public IEnumerable<ReturnedDictionary> CsvToDictionaries(TextReader reader, IEqualityComparer<string> keyComparer = null)
+    {
+      return CsvToDictionaries(StreamToCharConverter.ReaderToEnumerable(reader), keyComparer);
+    }
+
+    public IEnumerable<ReturnedDictionary> CsvToDictionaries(Stream stream, IEqualityComparer<string> keyComparer = null)
+    {
+      return CsvToDictionaries(StreamToCharConverter.StreamToEnumerable(stream), keyComparer);
     }
 
     public IEnumerable<ReturnedDictionary> CsvToDictionaries(IEnumerable<char> characters, IEqualityComparer<string> keyComparer = null)
@@ -55,6 +66,16 @@ namespace RGiesecke.PlainCsv
         yield return d;
         rowIndex += 1;
       } while (rowsEnum.MoveNext());
+    }
+
+    public IEnumerable<ReadOnlyStrings> ReadCsvRows(TextReader reader)
+    {
+      return ReadCsvRows(StreamToCharConverter.ReaderToEnumerable(reader));
+    }
+
+    public IEnumerable<ReadOnlyStrings> ReadCsvRows(Stream stream)
+    {
+      return ReadCsvRows(StreamToCharConverter.StreamToEnumerable(stream));
     }
 
     public IEnumerable<ReadOnlyStrings> ReadCsvRows(IEnumerable<Char> characters)
@@ -100,7 +121,7 @@ namespace RGiesecke.PlainCsv
         }
         finally
         {
-          if(reset)
+          if (reset)
             currentValue.Length = 0;
         }
       };
