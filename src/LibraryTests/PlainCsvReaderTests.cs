@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,6 +12,30 @@ namespace RGiesecke.PlainCsv.Tests
   [TestFixture, ExcludeFromCodeCoverage]
   public class PlainCsvReaderTests
   {
+    [Test]
+    public void CsvToDictionaries_ReadExample()
+    {
+      var reader = new PlainCsvReader();
+      var text = "a,b,c,d,e" +
+                 "\n,2, d\t,\"y\ns\"," +
+                 "\r\n1,2010-01-01,\"y\r\ns\",15:30, ";
+      var result = reader.CsvToDictionaries(text).ToList();
+
+      var firstRow = result[0];
+      var secondRow = result[1];
+      Assert.That(firstRow["a"], Is.EqualTo(null));
+      Assert.That(firstRow["b"], Is.EqualTo("2"));
+      Assert.That(firstRow["c"], Is.EqualTo(" d\t")); // leading space and trailing tab are preserved
+      Assert.That(firstRow["d"], Is.EqualTo("y\ns")); // line feed is preserved
+      Assert.That(firstRow["e"], Is.EqualTo(null));
+
+      Assert.That(secondRow["a"], Is.EqualTo("1"));
+      Assert.That(CsvUtils.ParseDateTime(secondRow["b"]), Is.EqualTo(new DateTime(2010, 1, 1)));
+      Assert.That(secondRow["c"], Is.EqualTo("y\r\ns")); // cariage return and line feed are preserved
+      Assert.That(CsvUtils.ParseDateTime(secondRow["d"]), Is.EqualTo(DateTime.MinValue.Add(new TimeSpan(15, 30, 0))));
+      Assert.That(secondRow["e"], Is.EqualTo(" "));
+    }
+
     [Test()]
     public void ReadCsvRows_Separates_By_NonString_LF_and_CR()
     {
@@ -22,10 +47,10 @@ namespace RGiesecke.PlainCsv.Tests
         Assert.That(actual.Count, Is.EqualTo(2));
         Assert.That(actual[0], Is.EqualTo(new[] { "a", "b", "c" }));
         Assert.That(actual[1], Is.EqualTo(new[] { "1", "2", " 3" }));
-        
+
         actual = target.ReadCsvRows("a ,b" + l + " ,").ToList().AsReadOnly();
         Assert.That(actual.Count, Is.EqualTo(2));
-        Assert.That(actual[0], Is.EqualTo(new[] { "a ", "b"}));
+        Assert.That(actual[0], Is.EqualTo(new[] { "a ", "b" }));
         Assert.That(actual[1], Is.EqualTo(new[] { " ", null }));
       };
 
@@ -101,6 +126,16 @@ namespace RGiesecke.PlainCsv.Tests
       runWithLineDelimiter("", 0);
       runWithLineDelimiter("\n", 1);
       runWithLineDelimiter("\r\n", 1);
+    }
+
+    [Test()]
+    public void ReadCsvRows_Example()
+    {
+      var target = new PlainCsvReader();
+      var actual = target.ReadCsvRows("a,b,\"c\na\"\nb c").ToList();
+      Assert.That(actual.Count, Is.EqualTo(2));
+      Assert.That(actual[0], Is.EqualTo(new[] { "a", "b", "c\na" }));
+      Assert.That(actual[1], Is.EqualTo(new[] { "b c" }));
     }
 
     [Test()]

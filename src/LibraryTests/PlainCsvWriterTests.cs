@@ -21,6 +21,84 @@ namespace RGiesecke.PlainCsv.Tests
       return new OrderedDictionary(orderedDictionary.Select(t => new DictionaryEntry(t.Key, t.Value)), WrappedGenericEqualityComparer.FromTyped(orderedDictionary.KeyComparer));
     }
 
+
+    [Test()]
+    public void DictionariesToCsv_Write_Example_Merged_ColumnOrder()
+    {
+      var writer = new PlainCsvWriter(new CsvWriterOptions(CsvWriterOptions.Default, delimiter: '@'));
+      var sb = writer.DictionariesToCsvString(new[]
+      {
+        new OrderedDictionary // I use this class to ensure the column order
+        {
+          {"a@a", 1},
+          {"b", new DateTime(2009, 1, 20, 15, 2, 0)},
+        },
+        new OrderedDictionary
+        {
+          {"y", 23.440m},
+          {"b", DateTime.MinValue.AddHours(16).AddMinutes(5).AddSeconds(19)},
+        },
+      });
+
+
+      using (var r = new StringReader(sb.ToString()))
+      {
+        var headerRow = r.ReadLine();
+        var rows = new[]
+        {
+          r.ReadLine(),
+          r.ReadLine(),
+        };
+
+        Assert.That(headerRow, Is.EqualTo("\"a@a\"@b@y")); // first name is quoted
+        Assert.That(rows[0], Is.EqualTo("1@2009-01-20T15:02:00@"));
+        Assert.That(rows[1], Is.EqualTo("@T16:05:19@23.44")); // date-part is considered unkown
+      }
+    }
+
+    [Test()]
+    public void DictionariesToCsv_Write_Example_SortedColumns()
+    {
+      var writer = new PlainCsvWriter(new CsvWriterOptions(CsvWriterOptions.Default,
+                                                            delimiter: '#',
+                                                            quoteChar:'|',
+                                                            sortedColumnNames: new[]
+                                                      {
+                                                        "y",
+                                                        "a#a",
+                                                        "b",
+                                                        "xyz" // names in this list can be missing from actual data
+                                                      }));
+      var sb = writer.DictionariesToCsvString(new IDictionary<string, object>[]
+      {
+        new Dictionary<string, object>
+        {
+          {"a#a", 1},
+          {"b", new DateTime(2009, 1, 20, 15, 2, 0)},
+        },
+        new Dictionary<string, object>
+        {
+          {"y", 23.440m},
+          {"b", DateTime.MinValue.AddHours(16).AddMinutes(5).AddSeconds(19)},
+        },
+      });
+
+
+      using (var r = new StringReader(sb.ToString()))
+      {
+        var headerRow = r.ReadLine();
+        var rows = new[]
+        {
+          r.ReadLine(),
+          r.ReadLine(),
+        };
+
+        Assert.That(headerRow, Is.EqualTo("y#|a#a|#b")); // according to sortedColumnNames y is first, b is last
+        Assert.That(rows[0], Is.EqualTo("#1#2009-01-20T15:02:00"));
+        Assert.That(rows[1], Is.EqualTo("23.44##T16:05:19")); // date-part is considered unkown
+      }
+    }
+
     [Test()]
     public void DictionariesToCsv_Handles_HashTable()
     {
