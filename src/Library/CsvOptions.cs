@@ -45,5 +45,11 @@ namespace RGiesecke.PlainCsv
     public CsvOptions()
       : this('"', ',', CsvFlags.UseHeaderRow)
     { }
+
+    public CsvOptions(CsvOptions source, char? quoteChar = null, char? delimiter = null, CsvFlags? csvFlags = null)
+    :this(quoteChar ?? source.QuoteChar,
+          delimiter ?? source.Delimiter,
+          csvFlags ?? source.CsvFlags)
+    {}
   }
 }
