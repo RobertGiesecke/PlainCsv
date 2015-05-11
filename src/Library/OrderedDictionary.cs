@@ -9,7 +9,7 @@ namespace RGiesecke.PlainCsv
   /// <summary>
   /// A dictionary that keeps the elements in their original order
   /// </summary>
-  public class OrderedDictionary<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>>, IDictionary<TKey, TValue>, IDictionary
+  public class OrderedDictionary<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>>, IDictionary<TKey, TValue>
 #if ReadOnlyDictionary
   , IReadOnlyDictionary<TKey, TValue>
 #endif
@@ -18,6 +18,10 @@ namespace RGiesecke.PlainCsv
     private readonly IDictionary<TKey, TValue> _Dictionary;
     private readonly IEqualityComparer<TKey> _KeyComparer;
 
+    public IEqualityComparer<TKey> KeyComparer
+    {
+      get { return _KeyComparer; }
+    }
 
     public OrderedDictionary()
       : this(EqualityComparer<TKey>.Default)
@@ -48,20 +52,9 @@ namespace RGiesecke.PlainCsv
       return GetEnumeratorCore();
     }
 
-    protected virtual OrderedDictionaryEnumerator GetEnumeratorCore()
+    protected virtual IEnumerator<KeyValuePair<TKey, TValue>> GetEnumeratorCore()
     {
-      return new OrderedDictionaryEnumerator(_Keys.Select(k => new KeyValuePair<TKey, TValue>(k, _Dictionary[k])).GetEnumerator());
-    }
-
-    void IDictionary.Remove(object key)
-    {
-      Remove((TKey)key);
-    }
-
-    object IDictionary.this[object key]
-    {
-      get { return this[(TKey)key]; }
-      set { this[(TKey)key] = (TValue)value; }
+      return _Keys.Select(k => new KeyValuePair<TKey, TValue>(k, _Dictionary[k])).GetEnumerator();
     }
 
     IEnumerator IEnumerable.GetEnumerator()
@@ -75,78 +68,10 @@ namespace RGiesecke.PlainCsv
       _Dictionary.Add(item);
     }
 
-    bool IDictionary.Contains(object key)
-    {
-      return ContainsKey((TKey)key);
-    }
-
-    void IDictionary.Add(object key, object value)
-    {
-      Add((TKey)key, (TValue)value);
-    }
-
     public void Clear()
     {
       _Keys.Clear();
       _Dictionary.Clear();
-    }
-
-    protected class OrderedDictionaryEnumerator : IEnumerator<KeyValuePair<TKey, TValue>>,IDictionaryEnumerator
-    {
-      private readonly IEnumerator<KeyValuePair<TKey, TValue>> _Enumerator;
-
-      public OrderedDictionaryEnumerator(IEnumerator<KeyValuePair<TKey, TValue>>  enumerator)
-      {
-        _Enumerator = enumerator;
-      }
-
-      public bool MoveNext()
-      {
-        var moveNext = _Enumerator.MoveNext();
-        if (!moveNext)
-        {
-          _Entry.Key = null;
-          _Entry.Value = null;
-        }
-        else
-        {
-          var kv = _Enumerator.Current;
-          _Entry.Key = kv.Key;
-          _Entry.Value = kv.Value;
-        }
-        return moveNext;
-      }
-
-      public void Reset()
-      {
-        _Enumerator.Reset();
-      }
-
-      public KeyValuePair<TKey, TValue> Current
-      {
-        get { return _Enumerator.Current; }
-      }
-
-      object IEnumerator.Current
-      {
-        get { return _Enumerator.Current; }
-      }
-
-      object IDictionaryEnumerator.Key { get { return _Enumerator.Current.Key; } }
-      object IDictionaryEnumerator.Value { get { return _Enumerator.Current.Value; } }
-
-      private DictionaryEntry _Entry;
-      public DictionaryEntry Entry { get { return _Entry; } }
-      
-      public void Dispose()
-      {
-        _Enumerator.Dispose();
-      }
-    }
-
-    IDictionaryEnumerator IDictionary.GetEnumerator()
-    {
-      return GetEnumeratorCore();
     }
 
     public bool Contains(KeyValuePair<TKey, TValue> item)
@@ -165,39 +90,14 @@ namespace RGiesecke.PlainCsv
       return _Dictionary.Remove(item);
     }
 
-    void ICollection.CopyTo(Array array, int index)
-    {
-      this.ToArray().CopyTo(array, index);
-    }
-
     public int Count
     {
       get { return _Dictionary.Count; }
     }
 
-    object ICollection.SyncRoot
-    {
-      get { return null; }
-    }
-
-    bool ICollection.IsSynchronized
-    {
-      get { return false; }
-    }
-
-    ICollection IDictionary.Values
-    {
-      get { return (ICollection)Values; }
-    }
-
     public bool IsReadOnly
     {
       get { return _Dictionary.IsReadOnly; }
-    }
-
-    bool IDictionary.IsFixedSize
-    {
-      get { return false; }
     }
 
     public bool ContainsKey(TKey key)
@@ -244,14 +144,120 @@ namespace RGiesecke.PlainCsv
       get { return _Keys; }
     }
 
-    ICollection IDictionary.Keys
-    {
-      get { return _Keys.ToList(); }
-    }
 
     public ICollection<TValue> Values
     {
       get { return this.Select(t => t.Value).ToList(); }
+    }
+  }
+
+  public class OrderedDictionary : IDictionary
+  {
+    readonly OrderedDictionary<object, object> _GenericDictionary;
+
+    static OrderedDictionary<object, object> FromUntyped(IEnumerable<DictionaryEntry> entries, IEqualityComparer keyComparer = null)
+    {
+      var asList = entries.ToList();
+      var c = WrappedEqualityComparer.FromUntyped(keyComparer);
+      var d = asList.ToDictionary(k => k.Key, v => v.Value, c);
+      return new OrderedDictionary<object, object>(asList.Select(t => t.Key), d, c);
+    }
+
+    public OrderedDictionary(IEnumerable<DictionaryEntry> entries, IEqualityComparer keyComparer = null)
+      : this(FromUntyped(entries, keyComparer))
+    {
+    }
+
+    public OrderedDictionary(IEqualityComparer keyComparer = null)
+      : this(new OrderedDictionary<object, object>(WrappedEqualityComparer.FromUntyped(keyComparer)))
+    {
+    }
+
+    public OrderedDictionary(OrderedDictionary<object, object> typed)
+    {
+      if (typed == null) throw new ArgumentNullException("typed");
+      _GenericDictionary = typed;
+    }
+
+    public bool Contains(object key)
+    {
+      return ((IDictionary<object, object>)_GenericDictionary).ContainsKey(key);
+    }
+
+    public void Add(object key, object value)
+    {
+      ((IDictionary<object, object>)_GenericDictionary).Add(key, value);
+    }
+
+    public void Clear()
+    {
+      ((IDictionary<object, object>)_GenericDictionary).Clear();
+    }
+
+    protected virtual OrderedDictionaryEnumerator<object, object> GetEnumeratorCore()
+    {
+      return new OrderedDictionaryEnumerator<object, object>(((IDictionary<object, object>)_GenericDictionary).GetEnumerator());
+    }
+
+    public IDictionaryEnumerator GetEnumerator()
+    {
+      return GetEnumeratorCore();
+    }
+
+    public void Remove(object key)
+    {
+      ((IDictionary<object, object>)_GenericDictionary).Remove(key);
+    }
+
+    public object this[object key]
+    {
+      get { return ((IDictionary<object, object>)_GenericDictionary)[key]; }
+      set { ((IDictionary<object, object>)_GenericDictionary)[key] = value; }
+    }
+
+    public ICollection Keys
+    {
+      get { return (ICollection)((IDictionary<object, object>)_GenericDictionary).Keys; }
+    }
+
+    public ICollection Values
+    {
+      get { return (ICollection)((IDictionary<object, object>)_GenericDictionary).Values; }
+    }
+
+    public bool IsReadOnly
+    {
+      get { return ((IDictionary<object, object>)_GenericDictionary).IsReadOnly; }
+    }
+
+    public bool IsFixedSize
+    {
+      get { return false; }
+    }
+
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+      return GetEnumerator();
+    }
+
+    public void CopyTo(Array array, int index)
+    {
+      this.Cast<DictionaryEntry>().ToArray().CopyTo(array, index);
+    }
+
+    public int Count
+    {
+      get { return ((IDictionary<object, object>)_GenericDictionary).Count; }
+    }
+
+    public object SyncRoot
+    {
+      get { throw new NotImplementedException(); }
+    }
+
+    public bool IsSynchronized
+    {
+      get { return false; }
     }
   }
 }
