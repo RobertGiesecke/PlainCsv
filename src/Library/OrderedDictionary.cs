@@ -9,7 +9,7 @@ namespace RGiesecke.PlainCsv
   /// <summary>
   /// A dictionary that keeps the elements in their original order
   /// </summary>
-  public class OrderedDictionary<TKey, TValue> : IDictionary<TKey, TValue>
+  public class OrderedDictionary<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>>, IDictionary<TKey, TValue>, IDictionary
 #if ReadOnlyDictionary
   , IReadOnlyDictionary<TKey, TValue>
 #endif
@@ -45,7 +45,23 @@ namespace RGiesecke.PlainCsv
 
     public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
     {
-      return _Keys.Select(k => new KeyValuePair<TKey, TValue>(k, _Dictionary[k])).GetEnumerator();
+      return GetEnumeratorCore();
+    }
+
+    protected virtual OrderedDictionaryEnumerator GetEnumeratorCore()
+    {
+      return new OrderedDictionaryEnumerator(_Keys.Select(k => new KeyValuePair<TKey, TValue>(k, _Dictionary[k])).GetEnumerator());
+    }
+
+    void IDictionary.Remove(object key)
+    {
+      Remove((TKey)key);
+    }
+
+    object IDictionary.this[object key]
+    {
+      get { return this[(TKey)key]; }
+      set { this[(TKey)key] = (TValue)value; }
     }
 
     IEnumerator IEnumerable.GetEnumerator()
@@ -59,10 +75,78 @@ namespace RGiesecke.PlainCsv
       _Dictionary.Add(item);
     }
 
+    bool IDictionary.Contains(object key)
+    {
+      return ContainsKey((TKey)key);
+    }
+
+    void IDictionary.Add(object key, object value)
+    {
+      Add((TKey)key, (TValue)value);
+    }
+
     public void Clear()
     {
       _Keys.Clear();
       _Dictionary.Clear();
+    }
+
+    protected class OrderedDictionaryEnumerator : IEnumerator<KeyValuePair<TKey, TValue>>,IDictionaryEnumerator
+    {
+      private readonly IEnumerator<KeyValuePair<TKey, TValue>> _Enumerator;
+
+      public OrderedDictionaryEnumerator(IEnumerator<KeyValuePair<TKey, TValue>>  enumerator)
+      {
+        _Enumerator = enumerator;
+      }
+
+      public bool MoveNext()
+      {
+        var moveNext = _Enumerator.MoveNext();
+        if (!moveNext)
+        {
+          _Entry.Key = null;
+          _Entry.Value = null;
+        }
+        else
+        {
+          var kv = _Enumerator.Current;
+          _Entry.Key = kv.Key;
+          _Entry.Value = kv.Value;
+        }
+        return moveNext;
+      }
+
+      public void Reset()
+      {
+        _Enumerator.Reset();
+      }
+
+      public KeyValuePair<TKey, TValue> Current
+      {
+        get { return _Enumerator.Current; }
+      }
+
+      object IEnumerator.Current
+      {
+        get { return _Enumerator.Current; }
+      }
+
+      object IDictionaryEnumerator.Key { get { return _Enumerator.Current.Key; } }
+      object IDictionaryEnumerator.Value { get { return _Enumerator.Current.Value; } }
+
+      private DictionaryEntry _Entry;
+      public DictionaryEntry Entry { get { return _Entry; } }
+      
+      public void Dispose()
+      {
+        _Enumerator.Dispose();
+      }
+    }
+
+    IDictionaryEnumerator IDictionary.GetEnumerator()
+    {
+      return GetEnumeratorCore();
     }
 
     public bool Contains(KeyValuePair<TKey, TValue> item)
@@ -81,14 +165,39 @@ namespace RGiesecke.PlainCsv
       return _Dictionary.Remove(item);
     }
 
+    void ICollection.CopyTo(Array array, int index)
+    {
+      this.ToArray().CopyTo(array, index);
+    }
+
     public int Count
     {
       get { return _Dictionary.Count; }
     }
 
+    object ICollection.SyncRoot
+    {
+      get { return null; }
+    }
+
+    bool ICollection.IsSynchronized
+    {
+      get { return false; }
+    }
+
+    ICollection IDictionary.Values
+    {
+      get { return (ICollection)Values; }
+    }
+
     public bool IsReadOnly
     {
       get { return _Dictionary.IsReadOnly; }
+    }
+
+    bool IDictionary.IsFixedSize
+    {
+      get { return false; }
     }
 
     public bool ContainsKey(TKey key)
@@ -135,9 +244,14 @@ namespace RGiesecke.PlainCsv
       get { return _Keys; }
     }
 
+    ICollection IDictionary.Keys
+    {
+      get { return _Keys.ToList(); }
+    }
+
     public ICollection<TValue> Values
     {
-      get { return _Dictionary.Values; }
+      get { return this.Select(t => t.Value).ToList(); }
     }
   }
 }
