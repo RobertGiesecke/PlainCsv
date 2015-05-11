@@ -9,6 +9,7 @@ namespace RGiesecke.PlainCsv
     None = 0,
     UseHeaderRow = 1,
     QuoteFormulars = 2,
+    Iso8601Dates = 4,
   }
 
   public sealed class CsvOptions
@@ -50,7 +51,7 @@ namespace RGiesecke.PlainCsv
     }
 
     public CsvOptions()
-      : this('"', ',', CsvFlags.UseHeaderRow)
+      : this('"', ',', CsvFlags.UseHeaderRow | CsvFlags.Iso8601Dates)
     { }
 
     public CsvOptions(CsvOptions source, char? quoteChar = null, char? delimiter = null, CsvFlags? csvFlags = null)

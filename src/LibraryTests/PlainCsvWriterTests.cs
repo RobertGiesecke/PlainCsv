@@ -77,6 +77,8 @@ namespace RGiesecke.PlainCsv.Tests
       var firstLine = reader.ReadLine();
       var secondLine = reader.ReadLine();
       var thirdLine = reader.ReadLine();
+      var forthLine = reader.ReadLine();
+
       if (ignoreHeaderCase)
         Assert.That(headerRow, Is.EqualTo("a,\"b\"\"X\",D,c"));
       else
@@ -89,6 +91,11 @@ namespace RGiesecke.PlainCsv.Tests
         Assert.That(thirdLine, Is.EqualTo(",1922-03-07,,3.2"));
       else
         Assert.That(thirdLine, Is.EqualTo(",," + suffix + "3.2,1922-03-07"));
+
+      if (ignoreHeaderCase)
+        Assert.That(forthLine, Is.EqualTo(",1922-03-07T18:02:43,,"));
+      else
+        Assert.That(forthLine, Is.EqualTo(",," + suffix + ",1922-03-07T18:02:43"));
 
       Assert.That(reader.Peek(), Is.LessThan(0));
     }
@@ -112,6 +119,10 @@ namespace RGiesecke.PlainCsv.Tests
         {
           {"B\"x", new DateTime(1922, 3, 7)},
           {"c", 3.2f},
+        },
+        new OrderedDictionary<string, object>
+        {
+          {"B\"x", new DateTime(1922, 3, 7, 18, 02, 43)},
         },
       };
     }

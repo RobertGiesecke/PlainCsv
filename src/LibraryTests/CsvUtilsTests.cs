@@ -18,14 +18,18 @@ namespace RGiesecke.PlainCsv.Tests
     {
       var invariantCulture = CsvUtils.PersistedCultureInfo;
       var de = CultureInfo.GetCultureInfo("de");
+      var defaultFlags = CsvOptions.Default.CsvFlags;
+      var noIso8601 = defaultFlags & ~CsvFlags.Iso8601Dates;
 
       Assert.That(CsvUtils.ConvertToString(1.50m, invariantCulture), Is.EqualTo("1.5"));
       Assert.That(CsvUtils.ConvertToString(1.50m, de), Is.EqualTo("1,5"));
       Assert.That(CsvUtils.ConvertToString(1.00m, de), Is.EqualTo("1"));
 
       Assert.That(CsvUtils.ConvertToString(new DateTime(1952, 9, 23), invariantCulture), Is.EqualTo("1952-09-23"));
-      Assert.That(CsvUtils.ConvertToString(new DateTime(1952, 9, 23, 9, 2, 0), invariantCulture), Is.EqualTo("1952-09-23 09:02:00"));
-      Assert.That(CsvUtils.ConvertToString(new DateTime(1, 1, 1, 9, 2, 0), invariantCulture), Is.EqualTo("09:02:00"));
+      Assert.That(CsvUtils.ConvertToString(new DateTime(1952, 9, 23, 9, 2, 0), noIso8601, invariantCulture), Is.EqualTo("1952-09-23 09:02:00"));
+      Assert.That(CsvUtils.ConvertToString(new DateTime(1952, 9, 23, 9, 2, 0), invariantCulture), Is.EqualTo("1952-09-23T09:02:00"));
+      Assert.That(CsvUtils.ConvertToString(new DateTime(1, 1, 1, 9, 2, 0), noIso8601, invariantCulture), Is.EqualTo("09:02:00"));
+      Assert.That(CsvUtils.ConvertToString(new DateTime(1, 1, 1, 9, 2, 0), invariantCulture), Is.EqualTo("T09:02:00"));
     }
 
     [Test()]
@@ -50,8 +54,11 @@ namespace RGiesecke.PlainCsv.Tests
 
       compare("23.09.1952 14:02:12", de, new DateTime(1952, 9, 23, 14, 2, 12));
       compare("23.Okt.1952 14:02:12", de, new DateTime(1952, 10, 23, 14, 2, 12));
+      compare("1952-04-18T14:02:12", de, new DateTime(1952, 4, 18, 14, 2, 12));
+      compare("T14:02:12", de, new DateTime(1, 1, 1, 14, 2, 12));
       compare("14:02:12", de, new DateTime(1, 1, 1, 14, 2, 12));
       compare("02:02:12 pm", en, new DateTime(1, 1, 1, 14, 2, 12));
+      compare("T02:02:12", en, new DateTime(1, 1, 1, 2, 2, 12));
 
       compare("", en, null);
       compare(" ", en, null);

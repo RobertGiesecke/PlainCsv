@@ -45,7 +45,33 @@ namespace RGiesecke.PlainCsv
       if (text.IsNullOrWhiteSpace())
         return null;
 
+      if (!PrepareDateString(text, out text))
+        return null;
+
       return DateTime.Parse(text, cultureInfo ?? PersistedCultureInfo, DateTimeStyles.NoCurrentDateDefault);
+    }
+
+    private static bool PrepareDateString(string text, out string result)
+    {
+      if (text.IsNullOrWhiteSpace())
+      {
+        result = text;
+        return false;
+      }
+
+      result = text.Trim();
+      if (result.StartsWith("T"))
+        result = "0001-01-01" + result;
+      else if (result.EndsWith("T"))
+      {
+        result = result.Remove(result.Length - 1);
+        if (result.IsNullOrWhiteSpace())
+        {
+          result = text;
+          return false;
+        }
+      }
+      return true;
     }
 
     public static bool TryParseDateTime(string text, out DateTime? value)
@@ -55,7 +81,7 @@ namespace RGiesecke.PlainCsv
 
     public static bool TryParseDateTime(string text, CultureInfo cultureInfo, out DateTime? value)
     {
-      if (text.IsNullOrWhiteSpace())
+      if (!PrepareDateString(text, out text) || text.IsNullOrWhiteSpace())
       {
         value = null;
         return false;
@@ -73,6 +99,11 @@ namespace RGiesecke.PlainCsv
 
     public static string ConvertToString(object value, CultureInfo cultureInfo)
     {
+      return ConvertToString(value, CsvOptions.Default.CsvFlags, cultureInfo);
+    }
+
+    public static string ConvertToString(object value, CsvFlags csvFlags, CultureInfo cultureInfo)
+    {
       if (value == null)
         return null;
 
@@ -82,10 +113,23 @@ namespace RGiesecke.PlainCsv
         DateTime dateTime = asDt.Value;
         if (dateTime != DateTime.MinValue)
         {
+          var useIso8601Dates = (csvFlags & CsvFlags.Iso8601Dates) == CsvFlags.Iso8601Dates;
+
           if (dateTime.Date == DateTime.MinValue)
-            return dateTime.ToString("T", cultureInfo);
+          {
+            var result = dateTime.ToString("T", cultureInfo);
+            if (useIso8601Dates)
+              result = "T" + result;
+            return result;
+          }
           if (dateTime.TimeOfDay == TimeSpan.Zero)
-            return dateTime.ToString("d", cultureInfo);
+            return dateTime.ToString(useIso8601Dates && !HasIso8601DatePattern(cultureInfo) 
+                                       ? PersistedCultureInfo.DateTimeFormat.ShortDatePattern
+                                       : "d", 
+                                     cultureInfo);
+
+          if (useIso8601Dates)
+            return dateTime.ToString(dateTime.Kind == DateTimeKind.Local ? "O" : "s", cultureInfo);
         }
       }
 
@@ -94,6 +138,12 @@ namespace RGiesecke.PlainCsv
         return asDecimal.Value.ToString("0.################################", cultureInfo);
 
       return Convert.ToString(value, cultureInfo);
+    }
+
+    private static bool HasIso8601DatePattern(CultureInfo cultureInfo)
+    {
+      var shortDatePattern = cultureInfo.DateTimeFormat.ShortDatePattern;
+      return shortDatePattern == "yyyy'-'MM'-'dd" || (shortDatePattern == "yyyy-MM-dd" && cultureInfo.DateTimeFormat.DateSeparator == "-");
     }
   }
 }
