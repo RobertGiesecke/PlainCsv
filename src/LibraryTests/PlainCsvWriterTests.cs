@@ -54,6 +54,59 @@ namespace RGiesecke.PlainCsv.Tests
       runCaseSensitive(false);
     }
 
+    [Test()]
+    public void DictionariesToCsv_Uses_SortColumnNames()
+    {
+      Action<IEnumerable<string>, Action<StringReader>> m = (sortedColumnNames, assertions) =>
+      {
+        var target = new PlainCsvWriter(new CsvWriterOptions(sortedColumnNames));
+        var sb = target.DictionariesToCsvString(new IDictionary<string, object>[]
+        {
+          new Dictionary<string, object>
+          {
+            {"a", 1},
+            {"c", 3},
+          },
+          new Dictionary<string, object>
+          {
+            {"a", 1},
+            {"b", 2},
+          },
+        });
+
+        using (var r = new StringReader(sb.ToString()))
+        {
+          assertions(r);
+        }
+      };
+
+      m(new[] { "a", "b", "c" }, r =>
+      {
+        var headerRow = r.ReadLine();
+        var rows = new[]
+          {
+            r.ReadLine(),
+            r.ReadLine(),
+          };
+        Assert.That(headerRow, Is.EqualTo("a,b,c"));
+        Assert.That(rows[0], Is.EqualTo("1,,3"));
+        Assert.That(rows[1], Is.EqualTo("1,2,"));
+      });
+
+      m(new[] { "d", "b", "a", "c" }, r =>
+      {
+        var headerRow = r.ReadLine();
+        var rows = new[]
+          {
+            r.ReadLine(),
+            r.ReadLine(),
+          };
+        Assert.That(headerRow, Is.EqualTo("b,a,c"));
+        Assert.That(rows[0], Is.EqualTo(",1,3"));
+        Assert.That(rows[1], Is.EqualTo("2,1,"));
+      });
+    }
+
 
     [Test()]
     public void DictionariesToCsv_QuoteFormulars_Handles_Starting_EqualsSign()

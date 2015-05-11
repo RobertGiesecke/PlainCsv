@@ -67,34 +67,46 @@ namespace RGiesecke.PlainCsv
 
       cultureInfo = cultureInfo ?? GetPersistentCultureInfo();
 
-      var csvOptions = CsvOptions;
+      var headerValues = asList.SelectMany(t => t.Keys).Distinct(keyComparer).ToList().AsReadOnly();
 
-      var headerValues = asList.SelectMany(t => t.Keys).Distinct(keyComparer).ToList();
-
-      var escapeChars = GetEscapeChars(csvOptions);
+      IList<string> sortedColumnNames = CsvOptions.SortedColumnNames.ToList();
+      IList<string> headerNames = headerValues.Select(t => CsvUtils.ConvertToString(t, CsvOptions.CsvFlags, cultureInfo)).ToList().AsReadOnly();
+      
+      if (sortedColumnNames.Count > 0)
+      {
+        var reorderedHeaders = (from idx in Enumerable.Range(0, headerNames.Count)
+                                let name = headerNames[idx]
+                                let value = headerValues[idx]
+                                let sortIndex = sortedColumnNames.IndexOf(name)
+                                orderby sortIndex < 0 ? 1 : 0, sortIndex
+                                select new { name, value }).ToList();
+        headerValues = reorderedHeaders.ConvertAll(t => t.value).AsReadOnly();
+        headerNames = reorderedHeaders.ConvertAll(t => t.name).AsReadOnly();
+      }
+      var escapeChars = GetEscapeChars(CsvOptions);
 
       Func<string, string> escapeText = n =>
       {
         if (string.IsNullOrEmpty(n))
           return null;
 
-        if (csvOptions.QuoteFormulars && n.Trim().StartsWith("="))
-          return CsvUtils.QuoteText("=" + CsvUtils.QuoteText(n, csvOptions.QuoteChar), csvOptions.QuoteChar);
+        if (CsvOptions.QuoteFormulars && n.Trim().StartsWith("="))
+          return CsvUtils.QuoteText("=" + CsvUtils.QuoteText(n, CsvOptions.QuoteChar), CsvOptions.QuoteChar);
 
         if (n.IndexOfAny(escapeChars) > -1)
-          return CsvUtils.QuoteText(n, csvOptions.QuoteChar);
+          return CsvUtils.QuoteText(n, CsvOptions.QuoteChar);
 
         return n;
       };
 
-      if (csvOptions.UseHeaderRow)
+      if (CsvOptions.UseHeaderRow)
       {
         for (int i = 0; i < headerValues.Count; i++)
         {
           if (i > 0)
-            writer.Write(csvOptions.Delimiter);
+            writer.Write(CsvOptions.Delimiter);
 
-          writer.Write(escapeText(CsvUtils.ConvertToString(headerValues[i], CsvOptions.CsvFlags, cultureInfo)));
+          writer.Write(escapeText(headerNames[i]));
         }
 
         writer.WriteLine();
@@ -105,11 +117,11 @@ namespace RGiesecke.PlainCsv
         for (int i = 0; i < headerValues.Count; i++)
         {
           if (i > 0)
-            writer.Write(csvOptions.Delimiter);
+            writer.Write(CsvOptions.Delimiter);
 
           TValue value;
           if (row.TryGetValue(headerValues[i], out value))
-            writer.Write(escapeText(CsvUtils.ConvertToString(value, csvOptions.CsvFlags, cultureInfo)));
+            writer.Write(escapeText(CsvUtils.ConvertToString(value, CsvOptions.CsvFlags, cultureInfo)));
         }
         writer.WriteLine();
       }
