@@ -12,7 +12,7 @@ namespace RGiesecke.PlainCsv
     Iso8601Dates = 4,
   }
 
-  public sealed class CsvOptions
+  public class CsvOptions
   {
     public static readonly CsvOptions Default = new CsvOptions();
     public static readonly CsvOptions Excel = new CsvOptions('"', ',', CsvFlags.QuoteFormulars | CsvFlags.UseHeaderRow);

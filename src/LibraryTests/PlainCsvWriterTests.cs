@@ -58,7 +58,7 @@ namespace RGiesecke.PlainCsv.Tests
     [Test()]
     public void DictionariesToCsv_QuoteFormulars_Handles_Starting_EqualsSign()
     {
-      var target = new PlainCsvWriter(new CsvOptions(CsvOptions.Default, csvFlags: CsvFlags.QuoteFormulars | CsvFlags.UseHeaderRow));
+      var target = new PlainCsvWriter(new CsvWriterOptions(CsvOptions.Default, csvFlags: CsvFlags.QuoteFormulars | CsvFlags.UseHeaderRow));
       string line;
       IEnumerable<IDictionary<string, object>> PlainTestData = GetPlainTestData();
       var sb = target.DictionariesToCsvString(PlainTestData, StringComparer.OrdinalIgnoreCase);

@@ -9,16 +9,16 @@ using RGiesecke.PlainCsv.Core;
 
 namespace RGiesecke.PlainCsv
 {
-  public class PlainCsvWriter : PlainCsvBase
+  public class PlainCsvWriter : PlainCsvBase<CsvWriterOptions>
   {
     protected IDictionaryEntryConverter DictionaryEntryConverter { get; private set; }
 
-    public PlainCsvWriter(CsvOptions csvOptions = null)
+    public PlainCsvWriter(CsvWriterOptions csvOptions = null)
       : this(Core.DictionaryEntryConverter.Default, csvOptions)
     {
     }
 
-    public PlainCsvWriter(IDictionaryEntryConverter dictionaryEntryConverter, CsvOptions csvOptions = null)
+    public PlainCsvWriter(IDictionaryEntryConverter dictionaryEntryConverter, CsvWriterOptions csvOptions = null)
       : base(csvOptions)
     {
       if (dictionaryEntryConverter == null) throw new ArgumentNullException("dictionaryEntryConverter");
@@ -115,9 +115,14 @@ namespace RGiesecke.PlainCsv
       }
     }
 
-    protected virtual char[] GetEscapeChars(CsvOptions csvOptions)
+    protected virtual char[] GetEscapeChars(CsvWriterOptions csvOptions)
     {
       return new[] { csvOptions.Delimiter, csvOptions.QuoteChar, '\r', '\n' };
+    }
+
+    protected override CsvWriterOptions GetDefaultOptions()
+    {
+      return CsvWriterOptions.Default;
     }
   }
 }

@@ -2,12 +2,15 @@
 
 namespace RGiesecke.PlainCsv.Core
 {
-  public abstract class PlainCsvBase
+  public abstract class PlainCsvBase<TOptions>
+  where TOptions : CsvOptions
   {
-    public PlainCsvBase(CsvOptions csvOptions = null)
+    public PlainCsvBase(TOptions csvOptions = null)
     {
-      CsvOptions = csvOptions ?? CsvOptions.Default;
+      CsvOptions = csvOptions ?? GetDefaultOptions();
     }
+
+    protected abstract TOptions GetDefaultOptions();
 
     protected virtual CultureInfo GetPersistentCultureInfo()
     {
@@ -22,6 +25,6 @@ namespace RGiesecke.PlainCsv.Core
       return cultureInfo;
     }
 
-    public CsvOptions CsvOptions { get; private set; }
+    public TOptions CsvOptions { get; private set; }
   }
 }

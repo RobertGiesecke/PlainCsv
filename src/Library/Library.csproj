@@ -60,6 +60,7 @@
     <Compile Include="CsvUtils.cs" />
     <Compile Include="Core\DictionaryWrapper.cs" />
     <Compile Include="Core\OrderedDictionary.cs" />
+    <Compile Include="CsvWriterOptions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Core\WrappedEqualityComparer.cs" />
   </ItemGroup>

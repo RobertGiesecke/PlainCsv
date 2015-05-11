@@ -13,7 +13,7 @@ using ReadOnlyStrings = System.Collections.ObjectModel.ReadOnlyCollection<string
 #endif
 namespace RGiesecke.PlainCsv
 {
-  public class PlainCsvReader : PlainCsvBase
+  public class PlainCsvReader : PlainCsvBase<CsvOptions>
   {
     protected static readonly ICollection<char> LineBreakChars = new ReadOnlyCollection<char>(new[] { '\r', '\n' });
 
@@ -157,6 +157,11 @@ namespace RGiesecke.PlainCsv
         yield break;
       currentValues.Add(getAndResetCurrentValue(false));
       yield return currentValues.AsReadOnly();
+    }
+
+    protected override CsvOptions GetDefaultOptions()
+    {
+      return PlainCsv.CsvOptions.Default;
     }
   }
 }
