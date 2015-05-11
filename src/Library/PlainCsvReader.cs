@@ -92,7 +92,7 @@ namespace RGiesecke.PlainCsv
         };
       }
 
-      Func<string> getAndResetCurrentValue = () =>
+      Func<bool, string> getAndResetCurrentValue = reset =>
       {
         try
         {
@@ -100,7 +100,8 @@ namespace RGiesecke.PlainCsv
         }
         finally
         {
-          currentValue.Length = 0;
+          if(reset)
+            currentValue.Length = 0;
         }
       };
 
@@ -131,14 +132,14 @@ namespace RGiesecke.PlainCsv
 
           if (!withinString && currentChar == CsvOptions.Delimiter)
           {
-            currentValues.Add(getAndResetCurrentValue());
+            currentValues.Add(getAndResetCurrentValue(true));
           }
           else if (!withinString && LineBreakChars.Contains(currentChar))
           {
             if (currentChar == '\r' && peek() == '\n')
               moveNext();
             if (previousChar != null)
-              currentValues.Add(getAndResetCurrentValue());
+              currentValues.Add(getAndResetCurrentValue(true));
 
             yield return currentValues.AsReadOnly();
             maxValuesCount = Math.Max(maxValuesCount, currentValues.Count);
@@ -154,7 +155,7 @@ namespace RGiesecke.PlainCsv
 
       if (maxValuesCount == 0 || (previousChar == null || LineBreakChars.Contains(previousChar.Value)))
         yield break;
-      currentValues.Add(currentValue.ToString());
+      currentValues.Add(getAndResetCurrentValue(false));
       yield return currentValues.AsReadOnly();
     }
   }

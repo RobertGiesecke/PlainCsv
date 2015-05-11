@@ -20,8 +20,31 @@ namespace RGiesecke.PlainCsv.Tests
       {
         var actual = target.ReadCsvRows("a,b,c" + l + "1,2, 3").ToList().AsReadOnly();
         Assert.That(actual.Count, Is.EqualTo(2));
-        Assert.That(actual[0], Is.EqualTo(new[] {"a", "b", "c"}));
-        Assert.That(actual[1], Is.EqualTo(new[] {"1", "2", " 3"}));
+        Assert.That(actual[0], Is.EqualTo(new[] { "a", "b", "c" }));
+        Assert.That(actual[1], Is.EqualTo(new[] { "1", "2", " 3" }));
+        
+        actual = target.ReadCsvRows("a ,b" + l + " ,").ToList().AsReadOnly();
+        Assert.That(actual.Count, Is.EqualTo(2));
+        Assert.That(actual[0], Is.EqualTo(new[] { "a ", "b"}));
+        Assert.That(actual[1], Is.EqualTo(new[] { " ", null }));
+      };
+
+      runWithLineDelimiter("\n");
+      runWithLineDelimiter("\r");
+      runWithLineDelimiter("\r\n");
+    }
+
+    [Test()]
+    public void ReadCsvRows_Returns_Null_For_empty_Last_Value()
+    {
+      var target = new PlainCsvReader();
+
+      Action<string> runWithLineDelimiter = l =>
+      {
+        var actual = target.ReadCsvRows("a,b,c,d" + l + "1,2, 3,").ToList().AsReadOnly();
+        Assert.That(actual.Count, Is.EqualTo(2));
+        Assert.That(actual[0], Is.EqualTo(new[] { "a", "b", "c", "d" }));
+        Assert.That(actual[1], Is.EqualTo(new[] { "1", "2", " 3", null }));
       };
 
       runWithLineDelimiter("\n");
@@ -38,9 +61,9 @@ namespace RGiesecke.PlainCsv.Tests
       {
         var actual = target.ReadCsvRows("a,b,c" + l + "1,, ").ToList().AsReadOnly();
         Assert.That(actual.Count, Is.EqualTo(2));
-        Assert.That(actual[0], Is.EqualTo(new[] {"a", "b", "c"}));
-        Assert.That(actual[1], Is.EqualTo(new[] {"1", null, " "}));
-        Assert.That(actual[1], Is.Not.EqualTo(new[] {"1", "", " "}));
+        Assert.That(actual[0], Is.EqualTo(new[] { "a", "b", "c" }));
+        Assert.That(actual[1], Is.EqualTo(new[] { "1", null, " " }));
+        Assert.That(actual[1], Is.Not.EqualTo(new[] { "1", "", " " }));
       };
 
       runWithLineDelimiter("\n");
@@ -125,8 +148,8 @@ namespace RGiesecke.PlainCsv.Tests
         var characters = string.Format("a{0}b{0}{1}c{2}{1}{0}s{2}1{0}2{0} 3{0}{1} {1}{1}{0}ä {1}", d, q, l);
         var actual = target.CsvToDictionaries(characters).ToList().AsReadOnly();
         Assert.That(actual.Count, Is.EqualTo(1));
-        Assert.That(actual[0].Keys, Is.EqualTo(new[] {"a", "b", "c" + l, "s"}));
-        Assert.That(actual[0].Values, Is.EqualTo(new[] {"1", "2", " 3", string.Format(" {1}{0}ä ", d, q)}));
+        Assert.That(actual[0].Keys, Is.EqualTo(new[] { "a", "b", "c" + l, "s" }));
+        Assert.That(actual[0].Values, Is.EqualTo(new[] { "1", "2", " 3", string.Format(" {1}{0}ä ", d, q) }));
       };
 
       runWithDelimiter("\n", ',', '"');
@@ -143,9 +166,9 @@ namespace RGiesecke.PlainCsv.Tests
         var characters = string.Format("a{0}b{0}{1}c{2}{1}{0}s{2}1{0}2{0} 3{0}{1} {1}{1}{0}ä {1}", d, q, l);
         var actual = target.CsvToDictionaries(characters).ToList().AsReadOnly();
         Assert.That(actual.Count, Is.EqualTo(2));
-        Assert.That(actual[0].Keys, Is.EqualTo(new[] {"Field1", "Field2", "Field3", "Field4"}));
-        Assert.That(actual[0].Values, Is.EqualTo(new[] {"a", "b", "c" + l, "s"}));
-        Assert.That(actual[1].Values, Is.EqualTo(new[] {"1", "2", " 3", string.Format(" {1}{0}ä ", d, q)}));
+        Assert.That(actual[0].Keys, Is.EqualTo(new[] { "Field1", "Field2", "Field3", "Field4" }));
+        Assert.That(actual[0].Values, Is.EqualTo(new[] { "a", "b", "c" + l, "s" }));
+        Assert.That(actual[1].Values, Is.EqualTo(new[] { "1", "2", " 3", string.Format(" {1}{0}ä ", d, q) }));
       };
 
       runWithDelimiter("\n", ',', '"');
