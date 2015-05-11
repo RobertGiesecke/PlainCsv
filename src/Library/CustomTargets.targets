@@ -21,7 +21,7 @@
     <MSBuild Condition=""
              Projects="$(MSBuildProjectFullPath)"
              Targets="Rebuild"
-             Properties="Platform=$(Platform);BuildNugetPackage=false;Configuration=$(Configuration);TargetFrameworkVersion=v3.5;TargetFrameworkProfile=Client;OutputPath=$(Net35LibDir)" />
+             Properties="Platform=$(Platform);BuildNugetPackage=false;Configuration=$(Configuration);TargetFrameworkVersion=v3.5;TargetFrameworkProfile=Client;OutputPath=$(Net35LibDir);DebugSymbols=true;DebugType=full" />
   </Target>
 
   <Target Name="BuildNugetPackage" Condition="'$(BuildNugetPackage)' == 'true' and '$(TargetFrameworkVersion)' != 'v3.5'">
@@ -40,6 +40,9 @@
       <NugetBuildCall>$(NuGetCommand) pack &quot;$(MSBuildProjectFullPath)&quot; -p Configuration=$(Configuration) -o &quot;$(NugetTargetDir)&quot;</NugetBuildCall>
     </PropertyGroup>
     <Exec Command="$(NugetBuildCall) -Symbols"
+          LogStandardErrorAsError="true"
+          Condition="'$(NuGetCommand)' != ''"/>
+    <Exec Command="$(NugetBuildCall) -Exclude &quot;**\*.cs&quot; -Exclude &quot;**\*.pdb&quot;"
           LogStandardErrorAsError="true"
           Condition="'$(NuGetCommand)' != ''"/>
   </Target>
