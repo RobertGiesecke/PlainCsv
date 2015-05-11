@@ -6,7 +6,7 @@ namespace RGiesecke.PlainCsv.Core
   public class WrappedEqualityComparer : IEqualityComparer<object>
   {
     private readonly IEqualityComparer _Comparer;
-    public virtual bool Equals(object x, object y)
+    public new virtual bool Equals(object x, object y)
     {
       return _Comparer.Equals(x, y);
     }
@@ -42,7 +42,7 @@ namespace RGiesecke.PlainCsv.Core
   public class WrappedGenericEqualityComparer<T> : IEqualityComparer
   {
     private readonly IEqualityComparer<T> _Comparer;
-    public virtual bool Equals(object x, object y)
+    public new virtual bool Equals(object x, object y)
     {
       return _Comparer.Equals((T)x, (T)y);
     }
