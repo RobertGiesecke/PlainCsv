@@ -1,0 +1,104 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <BuildNugetPackage>true</BuildNugetPackage>
+    <PostBuildEventDependsOn>
+      $(PostBuildEventDependsOn);
+      BuildNugetPackage
+    </PostBuildEventDependsOn>
+
+    <BuildDependsOn>
+      CheckForReadOnlyDictionary;
+      $(BuildDependsOn);
+      BuildNugetPackage
+    </BuildDependsOn>
+    <Net35LibDir>$(MSBuildProjectDirectory)/NuGetBuild/lib/net35</Net35LibDir>
+    <Net40LibDir>$(MSBuildProjectDirectory)/NuGetBuild/lib/net40</Net40LibDir>
+  </PropertyGroup>
+
+  <Target Name="BuildForFx35">
+
+    <MakeDir Directories="$(Net35LibDir)"/>
+
+    <MSBuild Condition=""
+             Projects="$(MSBuildProjectFullPath)"
+             Targets="Rebuild"
+             Properties="Platform=$(Platform);BuildNugetPackage=false;Configuration=$(Configuration);TargetFrameworkVersion=v3.5;TargetFrameworkProfile=Client;OutputPath=$(Net35LibDir);DebugSymbols=true;DebugType=full" />
+  </Target>
+
+  <Target Name="BuildForFx40">
+
+    <MakeDir Directories="$(Net40LibDir)"/>
+
+    <MSBuild Condition=""
+             Projects="$(MSBuildProjectFullPath)"
+             Targets="Rebuild"
+             Properties="Platform=$(Platform);BuildNugetPackage=false;Configuration=$(Configuration);TargetFrameworkVersion=v4.0;TargetFrameworkProfile=Client;OutputPath=$(Net40LibDir);DebugSymbols=true;DebugType=full" />
+  </Target>
+
+  <Target Name="BuildNugetPackage" Condition="'$(BuildNugetPackage)' == 'true' and '$(TargetFrameworkVersion)' != 'v3.5'">
+    <RemoveDir Condition="exists('$(Net35LibDir)')" Directories="$(Net35LibDir)"/>
+    <RemoveDir Condition="exists('$(Net40LibDir)')" Directories="$(Net40LibDir)"/>
+
+    <CallTarget Condition="'$(Framework35Dir)' != '' and exists('$(Framework35Dir)')" Targets="BuildForFx35"/>
+    <CallTarget Condition="'$(Framework40Dir)' != '' and exists('$(Framework40Dir)')" Targets="BuildForFx40"/>
+
+    <PropertyGroup>
+      <NugetTargetDir Condition="'$(NugetTargetDir)' == ''">$(TargetDir)/Deploy</NugetTargetDir>
+      <TargetDirWithoutTralingSlash>$(NugetTargetDir.TrimEnd('\').TrimEnd('/'))</TargetDirWithoutTralingSlash>
+    </PropertyGroup>
+
+    <MakeDir Condition="!exists('$(NugetTargetDir)')" Directories="$(NugetTargetDir)"/>
+
+    <PropertyGroup>
+      <NugetBuildCall>$(NuGetCommand) pack &quot;$(MSBuildProjectFullPath)&quot; -p Configuration=$(Configuration) -o &quot;$(NugetTargetDir)&quot;</NugetBuildCall>
+    </PropertyGroup>
+    <Exec Command="$(NugetBuildCall) -Symbols"
+          LogStandardErrorAsError="true"
+          Condition="'$(NuGetCommand)' != ''"/>
+    <Exec Command="$(NugetBuildCall) -Exclude &quot;**\*.pdb&quot;"
+          LogStandardErrorAsError="true"
+          Condition="'$(NuGetCommand)' != ''"/>
+  </Target>
+
+  <Target Name="CheckForReadOnlyDictionary" BeforeTargets="CoreBuild">
+    <PropertyGroup Condition ="'$(TargetFrameworkVersion)' != 'v3.5' and '$(TargetFrameworkVersion)' != 'v4.0'">
+      <DefineConstants>$(DefineConstants) ReadOnlyDictionary</DefineConstants>
+    </PropertyGroup>
+    <PropertyGroup Condition ="'$(TargetFrameworkVersion)' != 'v3.5'">
+      <DefineConstants>$(DefineConstants) DynamicObject</DefineConstants>
+    </PropertyGroup>
+  </Target>
+
+
+  <Target Name="DllExportFindNugetVersion"
+          Condition="'$(BuildNugetPackage)' == 'true' and '$(NuGetCommand)' == '' and '$(NuGetToolsPath)' == ''"
+          BeforeTargets="BuildNugetPackage">
+    <XmlPeek XmlInputPath="$(SolutionDir).nuget/packages.config"
+             Query="/packages/package[@id='NuGet.CommandLine']/@version">
+      <Output TaskParameter="Result"
+              ItemName="NugetCommandLineVersionItem"/>
+    </XmlPeek>
+    <PropertyGroup>
+      <NugetCommandLineVersion Condition="'$(NugetCommandLineVersion)' == ''">@(NugetCommandLineVersionItem)</NugetCommandLineVersion>
+    </PropertyGroup>
+
+    <CreateProperty Condition="'$(NuGetToolsPath)' == ''"
+                    Value="$(SolutionDir)packages/NuGet.CommandLine.$(NugetCommandLineVersion)\tools">
+      <Output TaskParameter="Value"
+              PropertyName="NuGetToolsPath"></Output>
+    </CreateProperty>
+  </Target>
+
+  <Target Name="DllExportSetupNuGetCommand" Condition="'$(NuGetCommand)' == '' and '$(NuGetToolsPath)' != ''"
+  AfterTargets="DllExportFindNugetVersion"
+  BeforeTargets="BuildNugetPackage">
+    <PropertyGroup>
+      <NuGetExePath Condition=" '$(NuGetExePath)' == '' ">$(NuGetToolsPath)\NuGet.exe</NuGetExePath>
+
+      <NuGetCommand Condition=" '$(OS)' == 'Windows_NT'">"$(NuGetExePath)"</NuGetCommand>
+      <NuGetCommand Condition=" '$(OS)' != 'Windows_NT' ">mono --runtime=v4.0.30319 "$(NuGetExePath)"</NuGetCommand>
+    </PropertyGroup>
+  </Target>
+
+</Project>
