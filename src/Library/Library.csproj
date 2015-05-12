@@ -49,6 +49,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Core\CsvDictionary.cs" />
     <Compile Include="Core\DictionaryEntryConverter.cs" />
     <Compile Include="Core\IDictionaryEntryConverter.cs" />
     <Compile Include="IncorrectCsvColumnCountException.cs" />

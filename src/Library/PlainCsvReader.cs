@@ -23,22 +23,22 @@ namespace RGiesecke.PlainCsv
     {
     }
 
-    public IEnumerable<ReturnedDictionary> CsvToDictionaries(
-      TextReader reader, 
+    public IEnumerable<CsvDictionary<string>> CsvToDictionaries(
+      TextReader reader,
       IEqualityComparer<string> keyComparer = null)
     {
       return CsvToDictionaries(StreamToCharConverter.ReaderToEnumerable(reader), keyComparer);
     }
 
-    public IEnumerable<ReturnedDictionary> CsvToDictionaries(
-      Stream stream, 
+    public IEnumerable<CsvDictionary<string>> CsvToDictionaries(
+      Stream stream,
       IEqualityComparer<string> keyComparer = null)
     {
       return CsvToDictionaries(StreamToCharConverter.StreamToEnumerable(stream), keyComparer);
     }
 
-    public IEnumerable<ReturnedDictionary> CsvToDictionaries(
-      IEnumerable<char> characters, 
+    public IEnumerable<CsvDictionary<string>> CsvToDictionaries(
+      IEnumerable<char> characters,
       IEqualityComparer<string> keyComparer = null)
     {
       var rows = ReadCsvRows(characters);
@@ -61,7 +61,7 @@ namespace RGiesecke.PlainCsv
       do
       {
         var currentValues = rowsEnum.Current;
-        var d = new OrderedDictionary<string, string>(keyComparer);
+        var d = new CsvDictionary<string>(keyComparer);
         if (currentValues.Count != headerNames.Count)
           throw new IncorrectCsvColumnCountException(rowIndex, currentValues, headerNames);
 
@@ -69,7 +69,9 @@ namespace RGiesecke.PlainCsv
         {
           d.Add(headerNames[i], currentValues[i]);
         }
+
         yield return d;
+
         rowIndex += 1;
       } while (rowsEnum.MoveNext());
     }
