@@ -2,10 +2,20 @@ This is an implementation of the [http://en.wikipedia.org/wiki/Delimiter-separat
 
 I got fed up with libs that did all kinds of extra stuff, but didn't adhere to the spec. So I started this little library.
 
-## Examples:
+## Usage:
+
+### Installing
+
+Just install PlainCsv via the package manager or the package manager console ` install-package PlainCsv `
+
+### Building
+Building should be straightforward (if you have .Net 4.5).
+If you have an older version, just change the targetframework to what you have.
+It should be at least 3.5 Client, though.
+
+I use [https://www.nuget.org/packages/CreateSnkFile](https://www.nuget.org/packages/CreateSnkFile "CreateSnkFile"), which will auto-create the SNK file (that I haven't checked-in)
 
 ### Reading
-
 
 #### Read into a list of dictionaries 
 ```c#
