@@ -19,6 +19,7 @@ namespace RGiesecke.PlainCsv
   public class CsvOptions
   {
     public static readonly CsvOptions Default = new CsvOptions();
+    public static readonly CsvOptions TabSeparated = new CsvOptions(delimiter:'\t');
     public static readonly CsvOptions Excel = new CsvOptions('"', ',', CsvFlags.QuoteFormulars | CsvFlags.UseHeaderRow);
 
     public char QuoteChar { get; private set; }
