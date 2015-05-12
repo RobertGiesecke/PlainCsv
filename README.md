@@ -57,12 +57,12 @@ You can provide a keyComparer so that differently cased keys will end up in the 
 var writer = new PlainCsvWriter(new CsvWriterOptions(CsvWriterOptions.Default, delimiter: '@'));
 var sb = writer.DictionariesToCsvString(new[]
 {
-	new OrderedDictionary // I use this class to ensure the column order
+	new CsvDictionary<object> // I use this class to ensure the column order
 	{
 		{"a@a", 1},
 		{"b", new DateTime(2009, 1, 20, 15, 2, 0)},
 	},
-	new OrderedDictionary
+	new CsvDictionary<object>
 	{
 		{"y", 23.440m},
 		{"b", DateTime.MinValue.AddHours(16).AddMinutes(5).AddSeconds(19)},
@@ -95,9 +95,9 @@ If a column has been
 
 ``` c#
 var writer = new PlainCsvWriter(new CsvWriterOptions(CsvWriterOptions.Default,
-                                                    delimiter: '#',
-                                                    quoteChar:'|',
-                                                    sortedColumnNames: new[]
+                                                     delimiter: '#',
+                                                     quoteChar:'|',
+                                                     sortedColumnNames: new[]
                                 {
 	                                "y",
 	                                "a#a",
@@ -106,12 +106,12 @@ var writer = new PlainCsvWriter(new CsvWriterOptions(CsvWriterOptions.Default,
                                 }));
 var sb = writer.DictionariesToCsvString(new IDictionary<string, object>[]
 {
-	new Dictionary<string, object>
+	new CsvDictionary<object>
 	{
 		{"a#a", 1},
 		{"b", new DateTime(2009, 1, 20, 15, 2, 0)},
 	},
-	new Dictionary<string, object>
+	new CsvDictionary<object>
 	{
 		{"y", 23.440m},
 		{"b", DateTime.MinValue.AddHours(16).AddMinutes(5).AddSeconds(19)},
@@ -150,10 +150,10 @@ using(var textWriter = new StreamWriter(@"outputfile.csv", false, Encoding.UTF8)
 	csvWriter.DictionariesToCsv(textWriter, ssvReader.CsvToDictionaries(textReader)); 
 
 ```
-CsvToDictionaries only reads as long as it has to. So when you take only the first 10 rows, it will return very fast and use very little memory: 
+CsvToDictionaries and ReadCsvRows only read as long as they have to. So when you take only the first 10 rows, they will return very quickly and use very little memory: 
 
 ``` c#
-IList<IReadOnlyDictionary<string, string>> rows;
+IList<CsvDictionary> rows;
 var ssvReader = new PlainCsvReader(new CsvOptions(delimiter: ';'));
 using(var textReader = new StreamReader(@"sourcefile.txt"))
 	rows = ssvReader.CsvToDictionaries(textReader).Take(10).ToList(); 

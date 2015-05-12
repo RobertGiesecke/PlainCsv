@@ -29,12 +29,12 @@ namespace RGiesecke.PlainCsv.Tests
       var writer = new PlainCsvWriter(new CsvWriterOptions(CsvWriterOptions.Default, assumeFixedColumnCount: true));
       var unmatchedColumnCounts = new[]
       {
-        new OrderedDictionary
+        new CsvDictionary<object>
         {
           {"a", 1},
           {"b", 2},
         },
-        new OrderedDictionary
+        new CsvDictionary<object>
         {
           {"a", 1},
           {"c", 3},
@@ -42,12 +42,12 @@ namespace RGiesecke.PlainCsv.Tests
       };
       var matchedColumnCounts = new[]
       {
-        new OrderedDictionary
+        new CsvDictionary<object>
         {
           {"a", 1},
           {"b", 2},
         },
-        new OrderedDictionary
+        new CsvDictionary<object>
         {
           {"a", 1},
           {"B", 3}, // the same using OrdinalIgnoreCase
@@ -206,14 +206,14 @@ namespace RGiesecke.PlainCsv.Tests
       Action<IEnumerable<string>, Action<StringReader>> m = (sortedColumnNames, assertions) =>
       {
         var target = new PlainCsvWriter(new CsvWriterOptions(sortedColumnNames: sortedColumnNames));
-        var sb = target.DictionariesToCsvString(new IDictionary<string, object>[]
+        var sb = target.DictionariesToCsvString(new []
         {
-          new Dictionary<string, object>
+          new CsvDictionary<object>
           {
             {"a", 1},
             {"c", 3},
           },
-          new Dictionary<string, object>
+          new CsvDictionary<object>
           {
             {"a", 1},
             {"b", 2},

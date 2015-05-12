@@ -43,4 +43,23 @@ private readonly DynamicDictionaryView<TValue> _DynamicView;
 #endif
     }
   }
+
+  public class CsvDictionary : CsvDictionary<string>
+  {
+    public CsvDictionary()
+    {
+    }
+
+    public CsvDictionary(IEqualityComparer<string> keyComparer) : base(keyComparer)
+    {
+    }
+
+    public CsvDictionary(IEnumerable<string> keys, IDictionary<string, string> dictionary) : base(keys, dictionary)
+    {
+    }
+
+    public CsvDictionary(IEnumerable<string> keys, IDictionary<string, string> dictionary, IEqualityComparer<string> keyComparer) : base(keys, dictionary, keyComparer)
+    {
+    }
+  }
 }
