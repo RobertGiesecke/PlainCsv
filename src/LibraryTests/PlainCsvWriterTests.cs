@@ -18,8 +18,75 @@ namespace RGiesecke.PlainCsv.Tests
 
     OrderedDictionary FromTyped<TKey, TValue>(OrderedDictionary<TKey, TValue> orderedDictionary)
     {
-      return new OrderedDictionary(orderedDictionary.Select(t => new DictionaryEntry(t.Key, t.Value)), 
+      return new OrderedDictionary(orderedDictionary.Select(t => new DictionaryEntry(t.Key, t.Value)),
                                    WrappedGenericEqualityComparer.FromTyped(orderedDictionary.KeyComparer));
+    }
+
+
+    [Test]
+    public void DictionariesToCsv_With_AssumeFixedColumnCount_Throws_For_Inconsitent_Columns()
+    {
+      var writer = new PlainCsvWriter(new CsvWriterOptions(CsvWriterOptions.Default, assumeFixedColumnCount: true));
+      var unmatchedColumnCounts = new[]
+      {
+        new OrderedDictionary
+        {
+          {"a", 1},
+          {"b", 2},
+        },
+        new OrderedDictionary
+        {
+          {"a", 1},
+          {"c", 3},
+        },
+      };
+      var matchedColumnCounts = new[]
+      {
+        new OrderedDictionary
+        {
+          {"a", 1},
+          {"b", 2},
+        },
+        new OrderedDictionary
+        {
+          {"a", 1},
+          {"B", 3}, // the same using OrdinalIgnoreCase
+        },
+      };
+
+      try
+      {
+        writer.DictionariesToCsvString(unmatchedColumnCounts);
+        Assert.Fail();
+      }
+      catch (IncorrectCsvColumnCountException)
+      {
+      }
+
+      try
+      {
+        writer.DictionariesToCsvString(matchedColumnCounts, StringComparer.OrdinalIgnoreCase);
+      }
+      catch (IncorrectCsvColumnCountException ex)
+      {
+        Assert.Fail(ex.Message);
+      }
+
+      int selectCount = 0;
+
+      var uniqueRows = matchedColumnCounts.Take(0).ToList();
+
+      writer.DictionariesToCsvString(matchedColumnCounts.Select(t =>
+      {
+        selectCount += 1;
+        lock (uniqueRows)
+          if (!uniqueRows.Contains(t))
+            uniqueRows.Add(t);
+        return t;
+      }), StringComparer.OrdinalIgnoreCase);
+
+      Assert.That(selectCount, Is.LessThanOrEqualTo(matchedColumnCounts.Length), string.Format("DictionariesToCsv enumerated the list of rows more than once."));
+      Assert.That(uniqueRows.Count, Is.EqualTo(matchedColumnCounts.Length), string.Format("DictionariesToCsv did not read all rows."));
     }
 
 

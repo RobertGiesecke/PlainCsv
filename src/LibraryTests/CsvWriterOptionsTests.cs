@@ -24,5 +24,13 @@ namespace RGiesecke.PlainCsv.Tests
     {
       AssertThatSameQuoteCharAndDelimiterThrows((q, d) => new CsvWriterOptions(quoteChar: q, delimiter: d));
     }
+
+    [Test()]
+    public void CsvWriterOptions_Defaults_To_AssumeFixedColumnCount_False()
+    {
+      Assert.That(CsvWriterOptions.Default.AssumeFixedColumnCount, Is.EqualTo(false));
+      Assert.That(CsvWriterOptions.Excel.AssumeFixedColumnCount, Is.EqualTo(false));
+      Assert.That(new CsvWriterOptions().AssumeFixedColumnCount, Is.EqualTo(false));
+    }
   }
 }
