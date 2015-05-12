@@ -5,7 +5,7 @@
     <title>Simple (but correct) library to read and write CSV files</title>
     <authors>Robert Giesecke</authors>
     <owners>Robert Giesecke</owners>
-    <version>1.0.0</version>
+    <version>1.0.1.1</version>
     <summary></summary>
     <projectUrl>https://github.com/RobertGiesecke/PlainCsv</projectUrl>
     <description>This is a simple library to read and write CSV files.
