@@ -17,7 +17,7 @@ But to do it correctly (i.e. not messing up when it encounters line breaks).
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
 
     <releaseNotes></releaseNotes>
-    <tags>dsv csv sparated text</tags>
+    <tags>dsv csv separated text</tags>
     <frameworkAssemblies>
       <frameworkAssembly assemblyName="Microsoft.CSharp" targetFramework="net40" />
       <frameworkAssembly assemblyName="Microsoft.CSharp"  targetFramework="net45" />
