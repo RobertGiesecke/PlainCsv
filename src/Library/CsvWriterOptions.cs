@@ -14,6 +14,7 @@ namespace RGiesecke.PlainCsv
   {
     public bool AssumeFixedColumnCount { get; private set; }
     public static readonly new CsvWriterOptions Default = new CsvWriterOptions(CsvOptions.Default);
+    public static readonly CsvWriterOptions TabSeparated = new CsvWriterOptions(delimiter: '\t');
     public static readonly new CsvWriterOptions Excel = new CsvWriterOptions(CsvOptions.Excel);
 
     public ReadOnlyStrings SortedColumnNames { get; private set; }

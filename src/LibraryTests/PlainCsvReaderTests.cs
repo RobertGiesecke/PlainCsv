@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using RGiesecke.PlainCsv;
 using NUnit.Framework;
@@ -239,6 +241,28 @@ namespace RGiesecke.PlainCsv.Tests
       runWithDelimiter("\n", ',', '"', CsvFlags.UseHeaderRow, 0); // the header row will not be added to the rowindex 
       runWithDelimiter("\r", '|', '~', CsvFlags.None, 1);
       runWithDelimiter("\r\n", ',', '-', CsvFlags.None, 1);
+    }
+
+    [Test()]
+    public void ReadCsvRows_UnQuotedLineBreaks_Tries_To_Eat_Row_Test()
+    {
+      var ssvReader = new PlainCsvReader(
+        new CsvOptions(csvFlags: CsvOptions.Default.CsvFlags | CsvFlags.UnQuotedLineBreaks)
+      );
+
+      var actual = ssvReader.CsvToDictionaries("a,b,c\na,b\r\n, c\n1,2,3\n").ToList();
+      Assert.That(actual[0]["a"], Is.EqualTo("a"));
+      Assert.That(actual[0]["b"], Is.EqualTo("b\r\n"));
+      Assert.That(actual[0]["c"], Is.EqualTo(" c"));
+
+      try
+      {
+        ssvReader.CsvToDictionaries("a,b,c\na,b\r\n, c,x,y\n1,2,3\n").Count();
+        Assert.Fail();
+      }
+      catch (IncorrectCsvColumnCountException)
+      {
+      }
     }
   }
 }

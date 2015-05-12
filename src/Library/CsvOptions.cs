@@ -10,11 +10,16 @@ namespace RGiesecke.PlainCsv
     UseHeaderRow = 1,
     QuoteFormulars = 2,
     Iso8601Dates = 4,
+    /// <summary>
+    /// When set <see cref="PlainCsvReader.ReadCsvRows(System.Collections.Generic.IEnumerable{char})"/> will take line breaks when the field count is less than those of the first row.
+    /// </summary>
+    UnQuotedLineBreaks = 8,
   }
 
   public class CsvOptions
   {
     public static readonly CsvOptions Default = new CsvOptions();
+    public static readonly CsvOptions TabSeparated = new CsvOptions(delimiter:'\t');
     public static readonly CsvOptions Excel = new CsvOptions('"', ',', CsvFlags.QuoteFormulars | CsvFlags.UseHeaderRow);
 
     public char QuoteChar { get; private set; }
