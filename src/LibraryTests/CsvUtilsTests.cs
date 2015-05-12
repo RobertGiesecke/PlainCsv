@@ -25,11 +25,16 @@ namespace RGiesecke.PlainCsv.Tests
       Assert.That(CsvUtils.ConvertToString(1.50m, de), Is.EqualTo("1,5"));
       Assert.That(CsvUtils.ConvertToString(1.00m, de), Is.EqualTo("1"));
 
-      Assert.That(CsvUtils.ConvertToString(new DateTime(1952, 9, 23), invariantCulture), Is.EqualTo("1952-09-23"));
-      Assert.That(CsvUtils.ConvertToString(new DateTime(1952, 9, 23, 9, 2, 0), noIso8601, invariantCulture), Is.EqualTo("1952-09-23 09:02:00"));
-      Assert.That(CsvUtils.ConvertToString(new DateTime(1952, 9, 23, 9, 2, 0), invariantCulture), Is.EqualTo("1952-09-23T09:02:00"));
-      Assert.That(CsvUtils.ConvertToString(new DateTime(1, 1, 1, 9, 2, 0), noIso8601, invariantCulture), Is.EqualTo("09:02:00"));
-      Assert.That(CsvUtils.ConvertToString(new DateTime(1, 1, 1, 9, 2, 0), invariantCulture), Is.EqualTo("T09:02:00"));
+      Assert.That(CsvUtils.ConvertToString(new DateTime(1952, 9, 23), invariantCulture), 
+                  Is.EqualTo("1952-09-23"));
+      Assert.That(CsvUtils.ConvertToString(new DateTime(1952, 9, 23, 9, 2, 0), noIso8601, invariantCulture), 
+                  Is.EqualTo("1952-09-23 09:02:00"));
+      Assert.That(CsvUtils.ConvertToString(new DateTime(1952, 9, 23, 9, 2, 0), invariantCulture),
+                  Is.EqualTo("1952-09-23T09:02:00"));
+      Assert.That(CsvUtils.ConvertToString(new DateTime(1, 1, 1, 9, 2, 0), noIso8601, invariantCulture),
+                  Is.EqualTo("09:02:00"));
+      Assert.That(CsvUtils.ConvertToString(new DateTime(1, 1, 1, 9, 2, 0), invariantCulture),
+                  Is.EqualTo("T09:02:00"));
     }
 
     [Test()]

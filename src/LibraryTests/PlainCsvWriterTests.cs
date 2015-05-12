@@ -18,7 +18,8 @@ namespace RGiesecke.PlainCsv.Tests
 
     OrderedDictionary FromTyped<TKey, TValue>(OrderedDictionary<TKey, TValue> orderedDictionary)
     {
-      return new OrderedDictionary(orderedDictionary.Select(t => new DictionaryEntry(t.Key, t.Value)), WrappedGenericEqualityComparer.FromTyped(orderedDictionary.KeyComparer));
+      return new OrderedDictionary(orderedDictionary.Select(t => new DictionaryEntry(t.Key, t.Value)), 
+                                   WrappedGenericEqualityComparer.FromTyped(orderedDictionary.KeyComparer));
     }
 
 

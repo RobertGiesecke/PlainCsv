@@ -17,12 +17,21 @@ namespace RGiesecke.PlainCsv
 
     public ReadOnlyStrings SortedColumnNames { get; private set; }
 
-    public CsvWriterOptions(char? quoteChar = null, char? delimiter = null, CsvFlags? csvFlags = null, IEnumerable<string> sortedColumnNames = null)
+    public CsvWriterOptions(
+      char? quoteChar = null, 
+      char? delimiter = null, 
+      CsvFlags? csvFlags = null, 
+      IEnumerable<string> sortedColumnNames = null)
       : this(Default, quoteChar, delimiter, csvFlags, sortedColumnNames)
     {
     }
 
-    public CsvWriterOptions(CsvWriterOptions source, char? quoteChar = null, char? delimiter = null, CsvFlags? csvFlags = null, IEnumerable<string> sortedColumnNames = null)
+    public CsvWriterOptions(
+      CsvWriterOptions source, 
+      char? quoteChar = null, 
+      char? delimiter = null, 
+      CsvFlags? csvFlags = null, 
+      IEnumerable<string> sortedColumnNames = null)
       : base(source, quoteChar, delimiter, csvFlags)
     {
       if (sortedColumnNames != null)

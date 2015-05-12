@@ -9,7 +9,7 @@ namespace RGiesecke.PlainCsv.Core
   /// <summary>
   /// A dictionary that keeps the elements in their original order
   /// </summary>
-  public class OrderedDictionary<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>>, IDictionary<TKey, TValue>
+  public class OrderedDictionary<TKey, TValue> : IDictionary<TKey, TValue>
 #if ReadOnlyDictionary
   , IReadOnlyDictionary<TKey, TValue>
 #endif
@@ -38,7 +38,10 @@ namespace RGiesecke.PlainCsv.Core
     {
     }
 
-    public OrderedDictionary(IEnumerable<TKey> keys, IDictionary<TKey, TValue> dictionary, IEqualityComparer<TKey> keyComparer)
+    public OrderedDictionary(
+      IEnumerable<TKey> keys,
+      IDictionary<TKey, TValue> dictionary,
+      IEqualityComparer<TKey> keyComparer)
     {
       if (keys == null) throw new ArgumentNullException("keys");
       if (dictionary == null) throw new ArgumentNullException("dictionary");
@@ -54,12 +57,13 @@ namespace RGiesecke.PlainCsv.Core
 
     protected virtual IEnumerator<KeyValuePair<TKey, TValue>> GetEnumeratorCore()
     {
-      return _Keys.Select(k => new KeyValuePair<TKey, TValue>(k, _Dictionary[k])).GetEnumerator();
+      return _Keys.Select(k => new KeyValuePair<TKey, TValue>(k, _Dictionary[k]))
+                  .GetEnumerator();
     }
 
     IEnumerator IEnumerable.GetEnumerator()
     {
-      return ((IEnumerable)_Dictionary).GetEnumerator();
+      return GetEnumerator();
     }
 
     public void Add(KeyValuePair<TKey, TValue> item)
@@ -155,7 +159,9 @@ namespace RGiesecke.PlainCsv.Core
   {
     readonly OrderedDictionary<object, object> _GenericDictionary;
 
-    static OrderedDictionary<object, object> FromUntyped(IEnumerable<DictionaryEntry> entries, IEqualityComparer keyComparer = null)
+    static OrderedDictionary<object, object> FromUntyped(
+      IEnumerable<DictionaryEntry> entries,
+      IEqualityComparer keyComparer = null)
     {
       var asList = entries.ToList();
       var c = WrappedEqualityComparer.FromUntyped(keyComparer);
@@ -181,22 +187,22 @@ namespace RGiesecke.PlainCsv.Core
 
     public bool Contains(object key)
     {
-      return ((IDictionary<object, object>)_GenericDictionary).ContainsKey(key);
+      return _GenericDictionary.ContainsKey(key);
     }
 
     public void Add(object key, object value)
     {
-      ((IDictionary<object, object>)_GenericDictionary).Add(key, value);
+      _GenericDictionary.Add(key, value);
     }
 
     public void Clear()
     {
-      ((IDictionary<object, object>)_GenericDictionary).Clear();
+      _GenericDictionary.Clear();
     }
 
     protected virtual OrderedDictionaryEnumerator<object, object> GetEnumeratorCore()
     {
-      return new OrderedDictionaryEnumerator<object, object>(((IDictionary<object, object>)_GenericDictionary).GetEnumerator());
+      return new OrderedDictionaryEnumerator<object, object>(_GenericDictionary.GetEnumerator());
     }
 
     public IDictionaryEnumerator GetEnumerator()
@@ -206,28 +212,28 @@ namespace RGiesecke.PlainCsv.Core
 
     public void Remove(object key)
     {
-      ((IDictionary<object, object>)_GenericDictionary).Remove(key);
+      _GenericDictionary.Remove(key);
     }
 
     public object this[object key]
     {
-      get { return ((IDictionary<object, object>)_GenericDictionary)[key]; }
-      set { ((IDictionary<object, object>)_GenericDictionary)[key] = value; }
+      get { return _GenericDictionary[key]; }
+      set { _GenericDictionary[key] = value; }
     }
 
     public ICollection Keys
     {
-      get { return (ICollection)((IDictionary<object, object>)_GenericDictionary).Keys; }
+      get { return (ICollection)_GenericDictionary.Keys; }
     }
 
     public ICollection Values
     {
-      get { return (ICollection)((IDictionary<object, object>)_GenericDictionary).Values; }
+      get { return (ICollection)_GenericDictionary.Values; }
     }
 
     public bool IsReadOnly
     {
-      get { return ((IDictionary<object, object>)_GenericDictionary).IsReadOnly; }
+      get { return _GenericDictionary.IsReadOnly; }
     }
 
     public bool IsFixedSize
@@ -247,7 +253,7 @@ namespace RGiesecke.PlainCsv.Core
 
     public int Count
     {
-      get { return ((IDictionary<object, object>)_GenericDictionary).Count; }
+      get { return _GenericDictionary.Count; }
     }
 
     public object SyncRoot

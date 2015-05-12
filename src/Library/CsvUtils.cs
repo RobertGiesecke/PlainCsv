@@ -143,7 +143,9 @@ namespace RGiesecke.PlainCsv
     private static bool HasIso8601DatePattern(CultureInfo cultureInfo)
     {
       var shortDatePattern = cultureInfo.DateTimeFormat.ShortDatePattern;
-      return shortDatePattern == "yyyy'-'MM'-'dd" || (shortDatePattern == "yyyy-MM-dd" && cultureInfo.DateTimeFormat.DateSeparator == "-");
+      return shortDatePattern == "yyyy'-'MM'-'dd" || 
+              (shortDatePattern == "yyyy-MM-dd" && 
+               cultureInfo.DateTimeFormat.DateSeparator == "-");
     }
   }
 }

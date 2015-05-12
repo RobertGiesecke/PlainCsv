@@ -23,17 +23,23 @@ namespace RGiesecke.PlainCsv
     {
     }
 
-    public IEnumerable<ReturnedDictionary> CsvToDictionaries(TextReader reader, IEqualityComparer<string> keyComparer = null)
+    public IEnumerable<ReturnedDictionary> CsvToDictionaries(
+      TextReader reader, 
+      IEqualityComparer<string> keyComparer = null)
     {
       return CsvToDictionaries(StreamToCharConverter.ReaderToEnumerable(reader), keyComparer);
     }
 
-    public IEnumerable<ReturnedDictionary> CsvToDictionaries(Stream stream, IEqualityComparer<string> keyComparer = null)
+    public IEnumerable<ReturnedDictionary> CsvToDictionaries(
+      Stream stream, 
+      IEqualityComparer<string> keyComparer = null)
     {
       return CsvToDictionaries(StreamToCharConverter.StreamToEnumerable(stream), keyComparer);
     }
 
-    public IEnumerable<ReturnedDictionary> CsvToDictionaries(IEnumerable<char> characters, IEqualityComparer<string> keyComparer = null)
+    public IEnumerable<ReturnedDictionary> CsvToDictionaries(
+      IEnumerable<char> characters, 
+      IEqualityComparer<string> keyComparer = null)
     {
       var rows = ReadCsvRows(characters);
 

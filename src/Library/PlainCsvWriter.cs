@@ -25,8 +25,10 @@ namespace RGiesecke.PlainCsv
       DictionaryEntryConverter = dictionaryEntryConverter;
     }
 
-    public StringBuilder DictionariesToCsvString<TKey, TValue>(IEnumerable<IEnumerable<KeyValuePair<TKey, TValue>>> list,
-      IEqualityComparer<TKey> keyComparer = null, CultureInfo cultureInfo = null)
+    public StringBuilder DictionariesToCsvString<TKey, TValue>(
+      IEnumerable<IEnumerable<KeyValuePair<TKey, TValue>>> list,
+      IEqualityComparer<TKey> keyComparer = null, 
+      CultureInfo cultureInfo = null)
     {
       var sb = new StringBuilder();
       using (var w = new StringWriter(sb))
@@ -59,18 +61,31 @@ namespace RGiesecke.PlainCsv
           comparer, cultureInfo);
     }
 
-    public void DictionariesToCsv<TKey, TValue>(TextWriter writer, IEnumerable<IEnumerable<KeyValuePair<TKey, TValue>>> list, IEqualityComparer<TKey> keyComparer = null, CultureInfo cultureInfo = null)
+    public void DictionariesToCsv<TKey, TValue>(
+      TextWriter writer, 
+      IEnumerable<IEnumerable<KeyValuePair<TKey, TValue>>> list, 
+      IEqualityComparer<TKey> keyComparer = null, 
+      CultureInfo cultureInfo = null)
     {
-      var asList = list.Select(t => DictionaryEntryConverter.WrapDictionary(t, keyComparer)).ToList().AsReadOnly();
+      var asList = (from t in list
+                    select DictionaryEntryConverter.WrapDictionary(t, keyComparer))
+                     .ToList()
+                     .AsReadOnly();
       if (asList.Count == 0)
         return;
 
       cultureInfo = cultureInfo ?? GetPersistentCultureInfo();
 
-      var headerValues = asList.SelectMany(t => t.Keys).Distinct(keyComparer).ToList().AsReadOnly();
+      var headerValues = asList.SelectMany(t => t.Keys)
+                               .Distinct(keyComparer)
+                               .ToList()
+                               .AsReadOnly();
 
       IList<string> sortedColumnNames = CsvOptions.SortedColumnNames.ToList();
-      IList<string> headerNames = headerValues.Select(t => CsvUtils.ConvertToString(t, CsvOptions.CsvFlags, cultureInfo)).ToList().AsReadOnly();
+      IList<string> headerNames = (from t in headerValues
+                                   select CsvUtils.ConvertToString(t, CsvOptions.CsvFlags, cultureInfo))
+                                    .ToList()
+                                    .AsReadOnly();
       
       if (sortedColumnNames.Count > 0)
       {
@@ -78,8 +93,13 @@ namespace RGiesecke.PlainCsv
                                 let name = headerNames[idx]
                                 let value = headerValues[idx]
                                 let sortIndex = sortedColumnNames.IndexOf(name)
-                                orderby sortIndex < 0 ? 1 : 0, sortIndex
-                                select new { name, value }).ToList();
+                                orderby sortIndex < 0 ? 1 : 0, 
+                                        sortIndex
+                                select new
+                                {
+                                  name, 
+                                  value
+                                }).ToList();
         headerValues = reorderedHeaders.ConvertAll(t => t.value).AsReadOnly();
         headerNames = reorderedHeaders.ConvertAll(t => t.name).AsReadOnly();
       }
@@ -91,7 +111,8 @@ namespace RGiesecke.PlainCsv
           return null;
 
         if (CsvOptions.QuoteFormulars && n.Trim().StartsWith("="))
-          return CsvUtils.QuoteText("=" + CsvUtils.QuoteText(n, CsvOptions.QuoteChar), CsvOptions.QuoteChar);
+          return CsvUtils.QuoteText("=" + CsvUtils.QuoteText(n, CsvOptions.QuoteChar), 
+                                    CsvOptions.QuoteChar);
 
         if (n.IndexOfAny(escapeChars) > -1)
           return CsvUtils.QuoteText(n, CsvOptions.QuoteChar);

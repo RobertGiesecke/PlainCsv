@@ -4,26 +4,28 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-
+using EntryConverter = System.Func<object, System.Collections.Generic.KeyValuePair<object, object>>;
 namespace RGiesecke.PlainCsv.Core
 {
   public class DictionaryEntryConverter : IDictionaryEntryConverter
   {
-    public static readonly DictionaryEntryConverter Default = new DictionaryEntryConverter(new Dictionary<TypePair, Func<object, KeyValuePair<object, object>>>());
-    private readonly IDictionary<TypePair, Func<object, KeyValuePair<object, object>>> _EntryConvertersCache;
+    public static readonly DictionaryEntryConverter Default = new DictionaryEntryConverter(new Dictionary<TypePair, EntryConverter>());
+    private readonly IDictionary<TypePair, EntryConverter> _EntryConvertersCache;
     
     public DictionaryEntryConverter()
       : this(Default._EntryConvertersCache)
     {
     }
 
-    public DictionaryEntryConverter(IDictionary<TypePair, Func<object, KeyValuePair<object, object>>> entryConvertersCache)
+    public DictionaryEntryConverter(IDictionary<TypePair, EntryConverter> entryConvertersCache)
     {
       _EntryConvertersCache = entryConvertersCache;
     }
 
 
-    public virtual DictionaryWrapper<TKey, TValue> WrapDictionary<TKey, TValue>(IEnumerable<KeyValuePair<TKey, TValue>> keyValuePairs, IEqualityComparer<TKey> keyComparer)
+    public virtual DictionaryWrapper<TKey, TValue> WrapDictionary<TKey, TValue>(
+      IEnumerable<KeyValuePair<TKey, TValue>> keyValuePairs, 
+      IEqualityComparer<TKey> keyComparer)
     {
       if (keyComparer != null)
       {
@@ -44,11 +46,16 @@ namespace RGiesecke.PlainCsv.Core
       if (rd != null)
         return new DictionaryWrapper<TKey, TValue>(rd.Keys, rd.Count, rd.TryGetValue);
 #endif
-      var dx = keyValuePairs as IDictionary<TKey, TValue> ?? keyValuePairs.ToDictionary(k => k.Key, v => v.Value, keyComparer);
-      return new DictionaryWrapper<TKey, TValue>(dx.Keys.AsEnumerable(), dx.Count, dx.TryGetValue);
+      var dx = keyValuePairs as IDictionary<TKey, TValue> 
+                ?? keyValuePairs.ToDictionary(k => k.Key, 
+                                              v => v.Value, 
+                                              keyComparer);
+      return new DictionaryWrapper<TKey, TValue>(dx.Keys.AsEnumerable(),
+                                                 dx.Count, 
+                                                 dx.TryGetValue);
     }
 
-    private static Func<object, KeyValuePair<object, object>> FromTyped<TKey, TValue>()
+    private static EntryConverter FromTyped<TKey, TValue>()
     {
       if (typeof(TKey) == typeof(object) && typeof(TValue) == typeof(object))
         return e => (KeyValuePair<object, object>)e;
@@ -99,7 +106,8 @@ namespace RGiesecke.PlainCsv.Core
       {
         unchecked
         {
-          return ((KeyType != null ? KeyType.GetHashCode() : 0) * 397) ^ (ValueType != null ? ValueType.GetHashCode() : 0);
+          return ((KeyType != null ? KeyType.GetHashCode() : 0) * 397) ^ 
+                 (ValueType != null ? ValueType.GetHashCode() : 0);
         }
       }
 
@@ -114,7 +122,7 @@ namespace RGiesecke.PlainCsv.Core
       }
     }
 
-    public Func<object, KeyValuePair<object, object>> FromUntyped(object dictionary)
+    public EntryConverter FromUntyped(object dictionary)
     {
       if (dictionary == null) throw new ArgumentNullException("dictionary");
       var typePairs = (from t in dictionary.GetType().GetInterfaces()
@@ -126,7 +134,9 @@ namespace RGiesecke.PlainCsv.Core
 
       var d = dictionary as IDictionary;
       if (d == null)
-        throw new ArgumentOutOfRangeException("dictionary", String.Format("{0} is not assignable to IDictionary or IDictionary<,>.", dictionary.GetType()));
+        throw new ArgumentOutOfRangeException("dictionary",
+                                              String.Format("{0} is not assignable to IDictionary or IDictionary<,>.", 
+                                                            dictionary.GetType()));
 
       return e =>
       {
@@ -135,17 +145,17 @@ namespace RGiesecke.PlainCsv.Core
       };
     }
 
-    protected virtual Func<object, KeyValuePair<object, object>> FromTyped(TypePair typePairs)
+    protected virtual EntryConverter FromTyped(TypePair typePairs)
     {
       lock (_EntryConvertersCache)
       {
-        Func<object, KeyValuePair<object, object>> result;
+        EntryConverter result;
         if (_EntryConvertersCache.TryGetValue(typePairs, out result))
           return result;
 
         var genericFromTyped = _FromTypedMethod.MakeGenericMethod(typePairs.KeyType, typePairs.ValueType);
         _EntryConvertersCache.Add(typePairs,
-          result = (Func<object, KeyValuePair<object, object>>)genericFromTyped.Invoke(null, new object[0]));
+          result = (EntryConverter)genericFromTyped.Invoke(null, new object[0]));
 
         return result;
       }

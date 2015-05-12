@@ -3,7 +3,9 @@ using System.Collections.Generic;
 
 namespace RGiesecke.PlainCsv.Core
 {
-  public class OrderedDictionaryEnumerator<TKey, TValue> : IEnumerator<DictionaryEntry>, IEnumerator<KeyValuePair<TKey, TValue>>, IDictionaryEnumerator
+  public class OrderedDictionaryEnumerator<TKey, TValue> : IEnumerator<DictionaryEntry>, 
+                                                           IEnumerator<KeyValuePair<TKey, TValue>>, 
+                                                           IDictionaryEnumerator
   {
     private readonly IEnumerator<KeyValuePair<TKey, TValue>> _Enumerator;
 
