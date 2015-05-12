@@ -66,6 +66,7 @@
     <Otherwise />
   </Choose>
   <ItemGroup>
+    <Compile Include="Core\OrderedDictionaryTests.cs" />
     <Compile Include="CsvOptionsTests.cs" />
     <Compile Include="CsvOptionsTestsBase.cs" />
     <Compile Include="CsvUtilsTests.cs" />

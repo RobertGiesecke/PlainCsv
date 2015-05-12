@@ -129,7 +129,11 @@ namespace RGiesecke.PlainCsv.Core
     public TValue this[TKey key]
     {
       get { return _Dictionary[key]; }
-      set { _Dictionary[key] = value; }
+      set
+      {
+         _Keys.Add(key);
+        _Dictionary[key] = value;
+      }
     }
 
 #if ReadOnlyDictionary
