@@ -51,6 +51,9 @@
     <PropertyGroup Condition ="'$(TargetFrameworkVersion)' != 'v3.5' and '$(TargetFrameworkVersion)' != 'v4.0'">
       <DefineConstants>$(DefineConstants) ReadOnlyDictionary</DefineConstants>
     </PropertyGroup>
+    <PropertyGroup Condition ="'$(TargetFrameworkVersion)' != 'v3.5'">
+      <DefineConstants>$(DefineConstants) DynamicObject</DefineConstants>
+    </PropertyGroup>
   </Target>
 
 
