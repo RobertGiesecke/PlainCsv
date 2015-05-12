@@ -133,3 +133,29 @@ using (var r = new StringReader(sb.ToString()))
 	Assert.That(rows[1], Is.EqualTo("23.44##T16:05:19")); // date-part is considered unkown
 }
 ```
+
+### Converting
+
+When you enable CsvWriterOptions.AssumeFixedColumnCount, PlainCsvWriter doesn't have to read all rows before writing the first one.
+That means, it can stream rows directly from a PlainCsvReader. Because only one row is in memory at a given time, it is possible to convert or process very large files.
+
+This example converts a semicolon separated file into an utf8-encoded real CSV:
+
+``` c#
+
+var ssvReader = new PlainCsvReader(new CsvOptions(delimiter: ';'));
+var csvWriter = new PlainCsvWriter(new CsvWriterOptions(assumeFixedColumnCount: true));
+using(var textReader = new StreamReader(@"sourcefile.txt"))
+using(var textWriter = new StreamWriter(@"outputfile.csv", false, Encoding.UTF8))
+	csvWriter.DictionariesToCsv(textWriter, ssvReader.CsvToDictionaries(textReader)); 
+
+```
+CsvToDictionaries only reads as long as it has to. So when you take only the first 10 rows, it will return very fast and use very little memory: 
+
+``` c#
+IList<IReadOnlyDictionary<string, string>> rows;
+var ssvReader = new PlainCsvReader(new CsvOptions(delimiter: ';'));
+using(var textReader = new StreamReader(@"sourcefile.txt"))
+	rows = ssvReader.CsvToDictionaries(textReader).Take(10).ToList(); 
+
+```
