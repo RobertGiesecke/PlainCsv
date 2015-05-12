@@ -13,9 +13,11 @@
       BuildNugetPackage
     </BuildDependsOn>
     <Net35LibDir>$(MSBuildProjectDirectory)/NuGetBuild/lib/net35</Net35LibDir>
+    <Net40LibDir>$(MSBuildProjectDirectory)/NuGetBuild/lib/net40</Net40LibDir>
   </PropertyGroup>
 
   <Target Name="BuildForFx35">
+
     <MakeDir Directories="$(Net35LibDir)"/>
 
     <MSBuild Condition=""
@@ -24,10 +26,22 @@
              Properties="Platform=$(Platform);BuildNugetPackage=false;Configuration=$(Configuration);TargetFrameworkVersion=v3.5;TargetFrameworkProfile=Client;OutputPath=$(Net35LibDir);DebugSymbols=true;DebugType=full" />
   </Target>
 
+  <Target Name="BuildForFx40">
+
+    <MakeDir Directories="$(Net40LibDir)"/>
+
+    <MSBuild Condition=""
+             Projects="$(MSBuildProjectFullPath)"
+             Targets="Rebuild"
+             Properties="Platform=$(Platform);BuildNugetPackage=false;Configuration=$(Configuration);TargetFrameworkVersion=v4.0;TargetFrameworkProfile=Client;OutputPath=$(Net40LibDir);DebugSymbols=true;DebugType=full" />
+  </Target>
+
   <Target Name="BuildNugetPackage" Condition="'$(BuildNugetPackage)' == 'true' and '$(TargetFrameworkVersion)' != 'v3.5'">
     <RemoveDir Condition="exists('$(Net35LibDir)')" Directories="$(Net35LibDir)"/>
-    
+    <RemoveDir Condition="exists('$(Net40LibDir)')" Directories="$(Net40LibDir)"/>
+
     <CallTarget Condition="'$(Framework35Dir)' != '' and exists('$(Framework35Dir)')" Targets="BuildForFx35"/>
+    <CallTarget Condition="'$(Framework40Dir)' != '' and exists('$(Framework40Dir)')" Targets="BuildForFx40"/>
 
     <PropertyGroup>
       <NugetTargetDir Condition="'$(NugetTargetDir)' == ''">$(TargetDir)/Deploy</NugetTargetDir>

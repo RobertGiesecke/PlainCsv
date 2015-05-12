@@ -22,5 +22,7 @@ But to do it correctly (i.e. not messing up when it encounters line breaks).
   <files>
     <file src="NuGetBuild\lib\net35\*.dll" target="lib/net35"></file>
     <file src="NuGetBuild\lib\net35\*.pdb" target="lib/net35"></file>
+    <file src="NuGetBuild\lib\net40\*.dll" target="lib/net40"></file>
+    <file src="NuGetBuild\lib\net40\*.pdb" target="lib/net40"></file>
   </files>
 </package>
