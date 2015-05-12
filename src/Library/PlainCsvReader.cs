@@ -88,6 +88,7 @@ namespace RGiesecke.PlainCsv
 
     public IEnumerable<ReadOnlyStrings> ReadCsvRows(IEnumerable<Char> characters)
     {
+      var unquotedLineBreaks = (CsvOptions.CsvFlags & CsvFlags.UnQuotedLineBreaks) == CsvFlags.UnQuotedLineBreaks;
       var currentValues = new List<string>();
 
       var withinString = false;
@@ -96,6 +97,37 @@ namespace RGiesecke.PlainCsv
 
       var charEnum = characters.GetEnumerator();
       Func<char?> peek;
+      int? columnCount = null;
+      ReadOnlyStrings firstRow = null;
+
+      Func<IList<string>, bool> jumpToNewRow;
+      Func<ReadOnlyStrings, ReadOnlyStrings> yieldRow;
+      {
+        if (!unquotedLineBreaks)
+        {
+          yieldRow = r => r;
+          jumpToNewRow = cv => true;
+        }
+        else
+        {
+          jumpToNewRow = cv =>
+          {
+            var b = columnCount == null ||
+                    cv.Count >= columnCount.Value - 1;
+            return b;
+          };
+          yieldRow = r =>
+          {
+            if (columnCount == null)
+            {
+              if (firstRow == null)
+                firstRow = r;
+              columnCount = r.Count;
+            }
+            return r;
+          };
+        }
+      }
       Func<bool> moveNext;
       {
         bool? peeked = null;
@@ -136,6 +168,7 @@ namespace RGiesecke.PlainCsv
 
       char? previousChar = null;
       var maxValuesCount = 0;
+      var rowIndex = 0;
       while (moveNext())
       {
         var currentChar = charEnum.Current;
@@ -163,14 +196,16 @@ namespace RGiesecke.PlainCsv
           {
             currentValues.Add(getAndResetCurrentValue(true));
           }
-          else if (!withinString && LineBreakChars.Contains(currentChar))
+          else if (!withinString && LineBreakChars.Contains(currentChar) && jumpToNewRow(currentValues))
           {
             if (currentChar == '\r' && peek() == '\n')
               moveNext();
             if (previousChar != null)
               currentValues.Add(getAndResetCurrentValue(true));
 
-            yield return currentValues.AsReadOnly();
+            yield return yieldRow(currentValues.AsReadOnly());
+            if (unquotedLineBreaks && maxValuesCount > 0 && currentValues.Count > maxValuesCount)
+              throw new IncorrectCsvColumnCountException(rowIndex, currentValues.AsReadOnly(), firstRow);
             maxValuesCount = Math.Max(maxValuesCount, currentValues.Count);
             currentValues = new List<string>(maxValuesCount);
           }
@@ -185,7 +220,7 @@ namespace RGiesecke.PlainCsv
       if (maxValuesCount == 0 || (previousChar == null || LineBreakChars.Contains(previousChar.Value)))
         yield break;
       currentValues.Add(getAndResetCurrentValue(false));
-      yield return currentValues.AsReadOnly();
+      yield return yieldRow(currentValues.AsReadOnly());
     }
 
     protected override CsvOptions GetDefaultOptions()
