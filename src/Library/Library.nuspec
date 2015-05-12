@@ -7,16 +7,17 @@
     <owners>Robert Giesecke</owners>
     <version>1.0.0</version>
     <summary></summary>
+        <projectUrl>https://github.com/RobertGiesecke/PlainCsv</projectUrl>
     <description>This is a simple library to read and write CSV files.
 
-    Simple means it doesn't have fance mapping to DTOs or any thing like that.  
-    It's main purpose is to read CSV to dictionaries or write dictionaries to CSV.
-    But to do it correctly (i.e. not messing up when it encounters line breaks).
+Simple means it doesn't have fancy mapping to DTOs or anything like that.  
+It's main purpose is to read CSV to dictionaries or write dictionaries to CSV.
+But to do it correctly (i.e. not messing up when it encounters line breaks).
     </description>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
 
     <releaseNotes></releaseNotes>
-    <tags>csv sparated</tags>
+    <tags>dsv csv sparated text</tags>
   </metadata>
   <files>
     <file src="NuGetBuild\lib\net35\*.dll" target="lib/net35"></file>
