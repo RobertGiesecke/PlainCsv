@@ -21,6 +21,5 @@
   <files>
     <file src="NuGetBuild\lib\net35\*.dll" target="lib/net35"></file>
     <file src="NuGetBuild\lib\net35\*.pdb" target="lib/net35"></file>
-    <file src="**\*.cs" target="src" exclude="obj\**\*.*"></file>
   </files>
 </package>

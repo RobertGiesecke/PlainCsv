@@ -42,7 +42,7 @@
     <Exec Command="$(NugetBuildCall) -Symbols"
           LogStandardErrorAsError="true"
           Condition="'$(NuGetCommand)' != ''"/>
-    <Exec Command="$(NugetBuildCall) -Exclude &quot;**\*.cs&quot; -Exclude &quot;**\*.pdb&quot;"
+    <Exec Command="$(NugetBuildCall) -Exclude &quot;**\*.pdb&quot;"
           LogStandardErrorAsError="true"
           Condition="'$(NuGetCommand)' != ''"/>
   </Target>
