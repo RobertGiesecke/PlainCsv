@@ -61,7 +61,7 @@ namespace RGiesecke.PlainCsv.Tests
     {
       var writer = new PlainCsvWriter(new CsvWriterOptions(CsvWriterOptions.Default,
                                                             delimiter: '#',
-                                                            quoteChar:'|',
+                                                            quoteChar: '|',
                                                             sortedColumnNames: new[]
                                                       {
                                                         "y",
@@ -137,7 +137,7 @@ namespace RGiesecke.PlainCsv.Tests
     {
       Action<IEnumerable<string>, Action<StringReader>> m = (sortedColumnNames, assertions) =>
       {
-        var target = new PlainCsvWriter(new CsvWriterOptions(sortedColumnNames));
+        var target = new PlainCsvWriter(new CsvWriterOptions(sortedColumnNames: sortedColumnNames));
         var sb = target.DictionariesToCsvString(new IDictionary<string, object>[]
         {
           new Dictionary<string, object>
@@ -189,7 +189,7 @@ namespace RGiesecke.PlainCsv.Tests
     [Test()]
     public void DictionariesToCsv_QuoteFormulars_Handles_Starting_EqualsSign()
     {
-      var target = new PlainCsvWriter(new CsvWriterOptions(CsvOptions.Default, csvFlags: CsvFlags.QuoteFormulars | CsvFlags.UseHeaderRow));
+      var target = new PlainCsvWriter(new CsvWriterOptions(csvFlags: CsvFlags.QuoteFormulars | CsvFlags.UseHeaderRow));
       string line;
       IEnumerable<IDictionary<string, object>> PlainTestData = GetPlainTestData();
       var sb = target.DictionariesToCsvString(PlainTestData, StringComparer.OrdinalIgnoreCase);

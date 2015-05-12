@@ -36,21 +36,23 @@ namespace RGiesecke.PlainCsv
       }
     }
 
-    public CsvOptions(char quoteChar, char delimiter, CsvFlags? csvFlags = null)
+    public CsvOptions(char? quoteChar = null, char? delimiter = null, CsvFlags? csvFlags = null)
     {
-      if (quoteChar == delimiter)
+      var usedQuoteChar = quoteChar ?? Default.QuoteChar;
+      var usedDelimiter = delimiter ?? Default.Delimiter;
+      if (usedQuoteChar == usedDelimiter)
       {
-        throw new ArgumentOutOfRangeException("delimiter", 
-                                              string.Format("delimiter ({0}) and quoteChar ({1}) cannot be the same.",  
-                                                            delimiter, 
-                                                            quoteChar));
+        throw new ArgumentOutOfRangeException("delimiter",
+                                              string.Format("delimiter ({0}) and quoteChar ({1}) cannot be the same.",
+                                                            usedDelimiter,
+                                                            usedQuoteChar));
       }
-      QuoteChar = quoteChar;
-      Delimiter = delimiter;
+      QuoteChar = usedQuoteChar;
+      Delimiter = usedDelimiter;
       CsvFlags = csvFlags ?? Default.CsvFlags;
     }
 
-    public CsvOptions()
+    protected CsvOptions()
       : this('"', ',', CsvFlags.UseHeaderRow | CsvFlags.Iso8601Dates)
     { }
 

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Collections.ObjectModel;
 #if ReadOnlyDictionary
@@ -16,19 +17,8 @@ namespace RGiesecke.PlainCsv
 
     public ReadOnlyStrings SortedColumnNames { get; private set; }
 
-    public CsvWriterOptions(char quoteChar, char delimiter, CsvFlags? csvFlags = null, IEnumerable<string> sortedColumnNames = null)
-      : base(quoteChar, delimiter, csvFlags)
-    {
-      SortedColumnNames = GetReadOnlyColumnNames(sortedColumnNames);
-    }
-
-    public CsvWriterOptions(IEnumerable<string> sortedColumnNames = null)
-    {
-      SortedColumnNames = GetReadOnlyColumnNames(sortedColumnNames);
-    }
-
-    public CsvWriterOptions(params string[] sortedColumnNames)
-      : this(sortedColumnNames.AsEnumerable())
+    public CsvWriterOptions(char? quoteChar = null, char? delimiter = null, CsvFlags? csvFlags = null, IEnumerable<string> sortedColumnNames = null)
+      : this(Default, quoteChar, delimiter, csvFlags, sortedColumnNames)
     {
     }
 
@@ -41,10 +31,10 @@ namespace RGiesecke.PlainCsv
         SortedColumnNames = source.SortedColumnNames;
     }
 
-    public CsvWriterOptions(CsvOptions source, char? quoteChar = null, char? delimiter = null, CsvFlags? csvFlags = null, IEnumerable<string> sortedColumnNames = null)
-      : base(source, quoteChar, delimiter, csvFlags)
+    protected CsvWriterOptions(CsvOptions source)
+      : base(source)
     {
-      SortedColumnNames = GetReadOnlyColumnNames(sortedColumnNames);
+      SortedColumnNames = new ReadOnlyCollection<string>(new string[0]);
     }
 
     protected virtual ReadOnlyStrings GetReadOnlyColumnNames(IEnumerable<string> sortedColumnNames)
