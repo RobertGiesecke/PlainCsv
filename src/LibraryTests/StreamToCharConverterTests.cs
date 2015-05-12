@@ -7,6 +7,8 @@ using System.Text;
 using System.Threading.Tasks;
 using RGiesecke.PlainCsv;
 using NUnit.Framework;
+using RGiesecke.PlainCsv.Core;
+
 namespace RGiesecke.PlainCsv.Tests
 {
   [TestFixture(), ExcludeFromCodeCoverage]

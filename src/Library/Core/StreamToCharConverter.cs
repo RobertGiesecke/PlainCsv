@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace RGiesecke.PlainCsv
+namespace RGiesecke.PlainCsv.Core
 {
   public class StreamToCharConverter
   {
