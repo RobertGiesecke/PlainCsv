@@ -83,7 +83,7 @@ namespace RGiesecke.PlainCsv
 
       IList<string> sortedColumnNames = CsvOptions.SortedColumnNames.ToList();
       IList<string> headerNames = (from t in headerValues
-                                   select CsvUtils.ConvertToString(t, CsvOptions.CsvFlags, cultureInfo))
+                                   select ConvertToString(t, cultureInfo))
                                     .ToList()
                                     .AsReadOnly();
       
@@ -142,7 +142,7 @@ namespace RGiesecke.PlainCsv
 
           TValue value;
           if (row.TryGetValue(headerValues[i], out value))
-            writer.Write(escapeText(CsvUtils.ConvertToString(value, CsvOptions.CsvFlags, cultureInfo)));
+            writer.Write(escapeText(ConvertToString(value, cultureInfo)));
         }
         writer.WriteLine();
       }

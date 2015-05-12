@@ -14,17 +14,15 @@ namespace RGiesecke.PlainCsv.Core
 
     protected virtual CultureInfo GetPersistentCultureInfo()
     {
-      var cultureInfo = (CultureInfo)CultureInfo.InvariantCulture.Clone();
-      var df = cultureInfo.DateTimeFormat;
-      df.LongDatePattern = "s";
-      df.ShortDatePattern = "yyyy'-'MM'-'dd";
-      df.DateSeparator = "-";
-      df.TimeSeparator = ":";
-      df.ShortTimePattern = "HH':'mm':'ss";
-      df.FullDateTimePattern = "s";
-      return cultureInfo;
+      return CsvUtils.PersistedCultureInfo;
     }
 
     public TOptions CsvOptions { get; private set; }
+
+    protected virtual string ConvertToString(object value, CultureInfo cultureInfo = null)
+    {
+      cultureInfo = cultureInfo ?? GetPersistentCultureInfo();
+      return CsvUtils.ConvertToString(value, CsvOptions.CsvFlags, cultureInfo);
+    }
   }
 }
